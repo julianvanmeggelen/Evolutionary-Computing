@@ -10,7 +10,6 @@ You learn:
 import logging
 import math
 
-import config
 import numpy as np
 import numpy.typing as npt
 from evaluate import evaluate
@@ -22,6 +21,9 @@ from revolve2.experimentation.optimization.ea import population_management, sele
 
 
 import neat
+
+
+global config
 
 def select_parents(
     rng: np.random.Generator,
@@ -90,25 +92,35 @@ def select_survivors(
     ]
 
 
-def init_neat():
+def init_neat(config=None):
     """This is needed to set the neat config
     """
     import os
-    local_dir = os.path.dirname(__file__)
-    config_path = os.path.join(local_dir, 'config-feedforward')
-    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
-        neat.DefaultSpeciesSet, neat.DefaultStagnation,
-        config_path)
+    if config is None:
+        local_dir = os.path.dirname(__file__)
+        config_path = os.path.join(local_dir, 'config-feedforward')
+        config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+            neat.DefaultSpeciesSet, neat.DefaultStagnation,
+            config_path)
     evaluate.config  = config
     Genotype.config = config.genome_config
     return config
 
-def main() -> None:
+def main(plot=True, config_in=None, callback=None) -> None:
     """Run the program."""
     # Set up standard logging.
     setup_logging()
 
-    neat_config = init_neat()
+    if config_in is None:
+        global config; import config as config
+        neat_config = init_neat()
+    else:
+        global config; config = config_in
+        neat_config = init_neat(config_in)
+
+
+    print('\n'.join([f'{k}: {v}' for k,v in neat_config.genome_config.__dict__.items() if "__" not in k]))
+
     # Set up the random number generater.
     rng = make_rng_time_seed()
 
@@ -138,10 +150,13 @@ def main() -> None:
 
     # Start the actual optimization process.
     logging.info("Start optimization process.")
-    mins= []
+    mins, maxs, means = [], [], []
     while generation_index < config.NUM_GENERATIONS:
         logging.info(f"Generation {generation_index + 1} / {config.NUM_GENERATIONS}.")
-        mins.append(np.mean([_.fitness for _ in population]))
+        maxs.append(np.max([_.fitness for _ in population]))
+        mins.append(np.min([_.fitness for _ in population]))
+        means.append(np.mean([_.fitness for _ in population]))
+
         # Create offspring.
         parents = select_parents(rng, population, config.OFFSPRING_SIZE)
         offspring_genotypes = [
@@ -175,9 +190,14 @@ def main() -> None:
 
         # Increase the generation index counter.
         generation_index += 1
-    import matplotlib.pyplot as plt
-    plt.plot(mins)
-    plt.show()
+    if plot:
+        import matplotlib.pyplot as plt
+        plt.plot(maxs, label = 'max'); plt.plot(mins, label = 'min'); plt.plot(means, label = 'avg');
+        plt.xlabel("Generation"); plt.ylabel("fitness"); plt.legend()
+        plt.show()
+
+    return maxs[-1]
+
 
 
 if __name__ == "__main__":

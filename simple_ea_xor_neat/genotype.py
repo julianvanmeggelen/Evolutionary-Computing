@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-import config
 import numpy as np
 import numpy.typing as npt
 from itertools import count

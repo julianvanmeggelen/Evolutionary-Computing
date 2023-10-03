@@ -18,23 +18,27 @@ def evaluate(genotype, config) -> float:
     :returns: Negative sum of squared errors and each individual error. 5x1 floats.
     """
     # Define all possible inputs for xor and the expected outputs
-    inputs = np.array([[0, 0], [1, 0], [0, 1], [1, 1]])
-    expected_outputs = np.array([0, 1, 1, 0])
+    inputs = [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0), (1.0, 1.0)]
+    expected_outputs = [(0.0,), (1.0,), (1.0,), (0.0,)]
 
     # Evaluate the provided network parameters
     net = neat.nn.FeedForwardNetwork.create(genotype.neatGenome, config)
-    outputs = np.array([net.activate(input) for input in inputs])
-    #print(outputs)
+    mse = []
+    for xi, xo in zip(inputs, expected_outputs):
+        output = net.activate(xi)
+        mse.append((output[0] - xo[0]) ** 2)
+    
+    fitness = -np.mean(mse)
+
+    #print(len(genotype.neatGenome.connections))
 
     # Calculate the difference between the network outputs and the expect outputs
-    errors = outputs - expected_outputs
-    print(np.mean(outputs.round() == expected_outputs))
+    #print(np.mean(outputs.round() == expected_outputs))
 
     # Return the sum of squared errors.
     # 0 would be an optimizal result.
     # We invert so we can maximize the fitness instead of minimize.
     # Finally we convert from a numpy float_ type to the python float type. This is not really important.
 
-    fitness =  - float(np.sum(errors**2))
     genotype.neatGenome.fitness = fitness
     return fitness
