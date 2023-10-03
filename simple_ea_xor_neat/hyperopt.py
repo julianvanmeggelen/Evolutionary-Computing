@@ -48,12 +48,15 @@ def objective(trial):
     config = Namespace()
     config.genome_config = DummyGenomeConfig()
 
+
+    #These are revole parameters
     config.POPULATION_SIZE = trial.suggest_int("POP_SIZE", 50,200)
     config.OFFSPRING_SIZE = int(config.POPULATION_SIZE  *trial.suggest_float("OFFSPRING_FRAC", 0.1,1))
     config.NUM_EVALS = 5000
     config.NUM_GENERATIONS = config.NUM_EVALS / (config.POPULATION_SIZE + config.OFFSPRING_SIZE)
 
 
+    #These are normally provided in neat's config file
     config.genome_config.activation_default      = "sigmoid"
     config.genome_config.activation_mutate_rate  = 0.0
     config.genome_config.activation_options      = "sigmoid"
