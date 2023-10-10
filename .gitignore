@@ -1,1 +1,10 @@
 /.DS_Store
+*.pyc
+*.cpython
+*.cpython-310.pyc
+*.png
+*.mp4
+*.pdf
+*.DS_Store
+*.pkl
+simple_ea_xor/__pycache__/config.cpython-310.pyc

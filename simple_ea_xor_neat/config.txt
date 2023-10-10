@@ -1,0 +1,7 @@
+neat config needed for the elements used here
+
+reproduction_type
+
+
+
+genotype.random: not random for neat?

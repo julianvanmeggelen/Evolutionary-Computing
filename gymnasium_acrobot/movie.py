@@ -4,6 +4,7 @@ import gymnasium as gym
 import pickle 
 import neat 
 import os 
+import numpy as np
 
 # load the winner
 with open('winner-feedforward', 'rb') as f:
@@ -22,7 +23,7 @@ config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
 
 print('Loaded genome:')
 print(c)
-env = gym.make("BipedalWalker-v3", hardcore=False, max_episode_steps=1000, render_mode = 'rgb_array')
+env = gym.make('Acrobot-v1', render_mode = 'rgb_array')
 
 
 
@@ -30,11 +31,17 @@ class SimulationRenderer:
     def __init__(self, env, net):
         self.env = env
         self.observation, self.observation_init_info = env.reset()
+        self.terminated = False
 
     def step(self, t):
-        output = net.activate(self.observation)
+        output = np.argmax(net.activate(self.observation)) 
+
         self.observation, reward, terminated, done, info = self.env.step(output)
-        return self.env.render()
+        if terminated or self.terminated:
+            self.terminated = terminated 
+        ret = self.env.render()
+        #print(t, terminated, ret is None)
+        return ret
 
 
 def make_movie(net, duration_seconds, output_filename):
@@ -48,4 +55,4 @@ def make_movie(net, duration_seconds, output_filename):
 
 if __name__ == "__main__":
     net = neat.nn.FeedForwardNetwork.create(c, config)
-    make_movie(net, 60, 'neat-bipedal-walker.mp4')
+    make_movie(net, 10, 'neat-bipedal-walker.mp4')
