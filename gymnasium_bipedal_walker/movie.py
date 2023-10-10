@@ -25,19 +25,24 @@ print(c)
 env = gym.make("BipedalWalker-v3", hardcore=False, max_episode_steps=1000, render_mode = 'rgb_array')
 
 
+
+class SimulationRenderer:
+    def __init__(self, env, net):
+        self.env = env
+        self.observation, self.observation_init_info = env.reset()
+
+    def step(self, t):
+        output = net.activate(self.observation)
+        self.observation, reward, terminated, done, info = self.env.step(output)
+        return self.env.render()
+
+
 def make_movie(net, duration_seconds, output_filename):
     w, h = 300, 100
     scale = 300 / 6
+    renderer = SimulationRenderer(env, net)
 
-    
-    observation, observation_init_info = env.reset()
-
-    def make_frame(t, observation):
-        output = net.activate(observation)
-        observation, reward, terminated, done, info = env.step(output)
-        return env.render()
-
-    clip = mpy.VideoClip(lambda t: make_frame(t,observation), duration=duration_seconds)
+    clip = mpy.VideoClip(renderer.step, duration=duration_seconds)
     clip.write_videofile(output_filename, codec="mpeg4", fps=50)
 
 
