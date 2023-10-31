@@ -40,11 +40,11 @@ def select_parents(
     """
     return np.array(
         [
-            selection.multiple_unique(
+            selection.topn(
                 2,
                 [individual.genotype for individual in population],
-                [individual.fitness for individual in population],
-                lambda _, fitnesses: selection.tournament(rng, fitnesses, k=1),
+                [individual.fitness for individual in population]
+                #,lambda _, fitnesses: selection.tournament(rng, fitnesses, k=1),
             )
             for _ in range(offspring_size)
         ],
@@ -73,7 +73,7 @@ def select_survivors(
             n,
             genotypes,
             fitnesses
-            #,lambda _, fitnesses: selection.tournament(rng, fitnesses, k=2),
+            #, lambda _, fitnesses: selection.tournament(rng, fitnesses, k=2),
         ),
     )
 

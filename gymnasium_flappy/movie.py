@@ -7,7 +7,7 @@ import os
 import numpy as np
 
 # load the winner
-with open('winner-feedforward', 'rb') as f:
+with open('winner-feedforward_overall', 'rb') as f:
     c = pickle.load(f)
     c= c.genotype.neatGenome
 
@@ -33,7 +33,7 @@ from evaluate import process_state
 class SimulationRenderer:
     def __init__(self, env, net):
         self.env = env
-        self.observation, self.observation_init_info = env.reset()
+        self.observation, self.observation_init_info = env.reset(seed=69)
         self.terminated = False
 
     def step(self, t):

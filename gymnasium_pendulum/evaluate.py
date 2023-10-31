@@ -23,8 +23,8 @@ Single-pole balancing experiment using a feed-forward neural network.
 """
 import neat
 
-runs_per_net = 5
-max_steps = 5000
+runs_per_net = 1
+max_steps = 500
 
 
 def evaluate(genotype, config) -> float:
@@ -41,7 +41,7 @@ def evaluate(genotype, config) -> float:
     for runs in range(runs_per_net):
         observation, observation_init_info = env.reset()
         # Run the given simulation for up to num_steps time steps.
-        fitness = 0.0
+        fitness = -float('inf')
         step = 0
         while True:
             step+=1
@@ -50,11 +50,11 @@ def evaluate(genotype, config) -> float:
             #print(output)
           
             observation, reward, terminated, done, info = env.step(output)
-            fitness += reward
+            #fitness = reward if reward > fitness else fitness
             if terminated or step > max_steps:
                 break
 
-        fitnesses.append(fitness)
+        fitnesses.append(reward)
 
     fitness = min(fitnesses)
 
@@ -66,7 +66,7 @@ def evaluate_genotypes(genotypes, config):
     # ret = []
     # for geno in tqdm(genotypes):
     #     ret.append(evaluate(geno, config))
-    ret = Parallel(n_jobs=-1, backend='multiprocessing', verbose=1)(delayed(evaluate)(gen, config) for gen in genotypes)
+    ret = Parallel(n_jobs=-1, backend='loky', verbose=0)(delayed(evaluate)(gen, config) for gen in genotypes)
     for gen, fitness in zip(genotypes, ret):
         gen.neatGenome.fitness = fitness
     return ret

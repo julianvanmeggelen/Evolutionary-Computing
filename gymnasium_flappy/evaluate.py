@@ -30,10 +30,12 @@ max_steps = float('inf')#5000
 
 def process_state(state):
     #print(state)
-    #dy = state[[9]] - state[[5]] #difference between player y and pipe y
-    #ret =  np.concatenate([state[[3]], state[[9]], dy])
+    dy_bottom = state[[9]] - state[[5]] #difference between player y and pipe y
+    dy_top= state[[9]] - state[[4]] #difference between player y and pipe y
+
+    #ret =  np.concatenate([state, dy_bottom, dy_top])
+    ret =  np.concatenate([dy_top, dy_bottom, state[[3]]])
     #print(ret)
-    return state
     return ret
 
 def evaluate(genotype, config) -> float:
@@ -48,7 +50,7 @@ def evaluate(genotype, config) -> float:
     net = neat.nn.FeedForwardNetwork.create(genotype.neatGenome, config)
     fitnesses = []
     for runs in range(runs_per_net):
-        observation, observation_init_info = env.reset()
+        observation, observation_init_info = env.reset(seed=69)
         # Run the given simulation for up to num_steps time steps.
         fitness = 0.0
         step = 0
@@ -65,7 +67,7 @@ def evaluate(genotype, config) -> float:
 
         fitnesses.append(fitness)
 
-    fitness = min(fitnesses)
+    fitness = min(fitnesses)**2
 
     genotype.neatGenome.fitness = fitness
     return fitness

@@ -8,7 +8,7 @@ from random import uniform, gauss
 
 class CartPole(object):
     gravity = 9.8  # acceleration due to gravity, positive is downward, m/sec^2
-    mcart = 1.0  # cart mass in kg
+    mcart = 0.5  # cart mass in kg
     mpole = 0.03  # pole mass in kg
     lpole = 0.5  # half the pole length in meters
     time_step = 0.01  # time step in seconds

@@ -69,11 +69,11 @@ def select_survivors(
         [i.fitness for i in original_population],
         [i.genotype for i in offspring_population],
         [i.fitness for i in offspring_population],
-        lambda n, genotypes, fitnesses: selection.multiple_unique(
+        lambda n, genotypes, fitnesses: selection.topn(
             n,
             genotypes,
-            fitnesses,
-            lambda _, fitnesses: selection.tournament(rng, fitnesses, k=2),
+            fitnesses
+            #lambda _, fitnesses: selection.tournament(rng, fitnesses, k=2),
         ),
     )
 

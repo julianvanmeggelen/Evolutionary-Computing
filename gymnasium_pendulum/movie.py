@@ -53,4 +53,4 @@ def make_movie(net, duration_seconds, output_filename):
 
 if __name__ == "__main__":
     net = neat.nn.FeedForwardNetwork.create(c, config)
-    make_movie(net, 10, 'neat-bipedal-walker.mp4')
+    make_movie(net, 20, 'neat-bipedal-walker.mp4')

@@ -23,8 +23,6 @@ import pickle
 import neat
 
 
-global config
-
 def select_parents(
     rng: np.random.Generator,
     population: list[Individual],
@@ -106,20 +104,23 @@ def init_neat(config=None):
     Genotype.config = config.genome_config
     return config
 
-def main(plot=True, config_in=None, callback=None, save_winner = False) -> None:
+def main(plot=True, config_in=None, callback=None, save_winner = False, verbose=1) -> None:
     """Run the program."""
     # Set up standard logging.
     setup_logging()
 
     if config_in is None:
-        global config; import config as config
+        global config; import config as config # use config.py
         neat_config = init_neat()
+        logging.info("Using config.py")
     else:
-        global config; config = config_in
+        global config; config = config_in #use provided config
         neat_config = init_neat(config_in)
+        logging.info("Using config_in")
 
 
-    print('\n'.join([f'{k}: {v}' for k,v in neat_config.genome_config.__dict__.items() if "__" not in k]))
+
+    #print('\n'.join([f'{k}: {v}' for k,v in neat_config.genome_config.__dict__.items() if "__" not in k]))
 
     # Set up the random number generater.
     rng = make_rng_time_seed()
@@ -134,7 +135,7 @@ def main(plot=True, config_in=None, callback=None, save_winner = False) -> None:
     ]
 
     # Evaluate the initial population.
-    logging.info("Evaluating initial population.")
+    if verbose > 0: logging.info("Evaluating initial population.")
     initial_fitnesses = [
         evaluate(genotype, neat_config) for genotype in initial_genotypes
     ]
@@ -149,10 +150,10 @@ def main(plot=True, config_in=None, callback=None, save_winner = False) -> None:
     generation_index = 0
 
     # Start the actual optimization process.
-    logging.info("Start optimization process.")
+    if verbose > 0: logging.info("Start optimization process.")
     mins, maxs, means = [], [], []
     while generation_index < config.NUM_GENERATIONS:
-        logging.info(f"Generation {generation_index + 1} / {config.NUM_GENERATIONS}.")
+        if verbose > 0: logging.info(f"Generation {generation_index + 1} / {config.NUM_GENERATIONS}.")
         maxs.append(np.max([_.fitness for _ in population]))
         mins.append(np.min([_.fitness for _ in population]))
         means.append(np.mean([_.fitness for _ in population]))
@@ -173,7 +174,7 @@ def main(plot=True, config_in=None, callback=None, save_winner = False) -> None:
             evaluate(genotype, neat_config) for genotype in offspring_genotypes
         ]
 
-        logging.info(f"Max fitness: {max(offspring_fitnesses)}")
+        if verbose > 0: logging.info(f"Max fitness: {maxs[-1]}")
 
         # Make an intermediate offspring population.
         offspring_population = [
@@ -201,8 +202,10 @@ def main(plot=True, config_in=None, callback=None, save_winner = False) -> None:
         with open('winner-feedforward', 'wb') as f:
             pickle.dump(winner, f)
 
-
-    return maxs[-1]
+    net_size_nodes = [len(ind.genotype.neatGenome.nodes) for ind in population] 
+    net_size_connections = [len(ind.genotype.neatGenome.connections) for ind in population]
+    all_fitness = [ind.fitness for ind in population]
+    return maxs[-1], maxs, means, mins, net_size_nodes, net_size_connections, all_fitness
 
 
 

@@ -1,9 +1,9 @@
 """Configuration parameters for this example."""
 
-POPULATION_SIZE = 100
-OFFSPRING_SIZE = 30
+POPULATION_SIZE = 20
+OFFSPRING_SIZE = 5
 
-NUM_GENERATIONS = 500
+NUM_GENERATIONS = 100
 
 
 

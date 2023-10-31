@@ -1,14 +1,8 @@
 """Evaluation functions. Uses neat-python nn.feedforward"""
 
-import numpy as np
-import numpy.typing as npt
-
 import neat 
-from neat.config import Config
-from neat.genome import DefaultGenome
 
 
-config: Config = None 
 
 
 """

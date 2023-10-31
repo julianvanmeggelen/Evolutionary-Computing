@@ -37,8 +37,9 @@ class SimulationRenderer:
         output = np.argmax(net.activate(self.observation)) 
 
         self.observation, reward, terminated, done, info = self.env.step(output)
-        if terminated or self.terminated:
+        if terminated or self.terminated or reward == 0:
             self.terminated = terminated 
+            
         ret = self.env.render()
         #print(t, terminated, ret is None)
         return ret

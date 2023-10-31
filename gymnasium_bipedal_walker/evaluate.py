@@ -41,7 +41,7 @@ def evaluate(genotype, config) -> float:
     net = neat.nn.FeedForwardNetwork.create(genotype.neatGenome, config)
     fitnesses = []
     for runs in range(runs_per_net):
-        observation, observation_init_info = env.reset()
+        observation, observation_init_info = env.reset(seed=42)
         # Run the given simulation for up to num_steps time steps.
         fitness = 0.0
         step = 0
@@ -67,7 +67,7 @@ def evaluate_genotypes(genotypes, config):
     # ret = []
     # for geno in tqdm(genotypes):
     #     ret.append(evaluate(geno, config))
-    ret = Parallel(n_jobs=-1, backend='multiprocessing', verbose=1)(delayed(evaluate)(gen, config) for gen in genotypes)
+    ret = Parallel(n_jobs=-1, backend='loky', verbose=0)(delayed(evaluate)(gen, config) for gen in genotypes)
     for gen, fitness in zip(genotypes, ret):
         gen.neatGenome.fitness = fitness
     return ret
