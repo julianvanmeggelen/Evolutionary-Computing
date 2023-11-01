@@ -6,11 +6,53 @@ from neat.aggregations import AggregationFunctionSet
 from neat.genes import DefaultConnectionGene, DefaultNodeGene
 
 
+class NeatGenomeConfigGenericMixin:
+    # these are properties that are not considered configuration by neat-python
+    node_gene_type = DefaultNodeGene
+    connection_gene_type = DefaultConnectionGene
+    bias_init_type: str = "gaussian"
+    response_init_type: str = "gaussian"
+    weight_init_type: str = "gaussian"
+    activation_defs: ActivationFunctionSet = ActivationFunctionSet()
+    aggregation_function_defs: AggregationFunctionSet = AggregationFunctionSet()
+    aggregation_defs = aggregation_function_defs
+    single_structural_mutation = False
+    enabled_rate_to_false_add: float = 0.0
+    enabled_rate_to_true_add: float = 0.0
+    structural_mutation_surer: str = "default"
+    node_indexer: count = count(1)
+
+    @property
+    def output_keys(self):
+        return [i for i in range(self.num_outputs)]
+
+    @property
+    def input_keys(self):
+        return [-i - 1 for i in range(self.num_inputs)]
+
+    def get_new_node_key(self, node_dict):
+        return next(self.node_indexer)
+
+    def check_structural_mutation_surer(self):
+        if self.structural_mutation_surer == "true":
+            return True
+        elif self.structural_mutation_surer == "false":
+            return False
+        elif self.structural_mutation_surer == "default":
+            return self.single_structural_mutation
+        else:
+            error_string = (
+                f"Invalid structural_mutation_surer {self.structural_mutation_surer!r}"
+            )
+            raise RuntimeError(error_string)
+
+
 @dataclass
-class NeatGenomeConfig:
+class NeatGenomeConfig(NeatGenomeConfigGenericMixin):
     """
     The configuration options that are needed to pass to neat DefaultGenome objects
     """
+
     # activation
     activation_default: str
     activation_mutate_rate: float
@@ -71,49 +113,13 @@ class NeatGenomeConfig:
     weight_mutate_rate: float
     weight_replace_rate: float
 
-    # these are properties that are not considered configuration by neat-python
-    node_gene_type = DefaultNodeGene
-    connection_gene_type = DefaultConnectionGene
-    bias_init_type: str = "gaussian"
-    response_init_type: str = "gaussian"
-    weight_init_type: str = "gaussian"
-    activation_defs: ActivationFunctionSet = ActivationFunctionSet()
-    aggregation_function_defs: AggregationFunctionSet = AggregationFunctionSet()
-    aggregation_defs = aggregation_function_defs
-    single_structural_mutation = False
-    enabled_rate_to_false_add: float = 0.0
-    enabled_rate_to_true_add: float = 0.0
-    structural_mutation_surer: str = "default"
-    node_indexer: count = count(1)
 
-    @property
-    def output_keys(self):
-        return [i for i in range(self.num_outputs)]
-
-    @property
-    def input_keys(self):
-        return [-i - 1 for i in range(self.num_inputs)]
-
-    def get_new_node_key(self, node_dict):
-        return next(self.node_indexer)
-
-    def check_structural_mutation_surer(self):
-        if self.structural_mutation_surer == "true":
-            return True
-        elif self.structural_mutation_surer == "false":
-            return False
-        elif self.structural_mutation_surer == "default":
-            return self.single_structural_mutation
-        else:
-            error_string = (
-                f"Invalid structural_mutation_surer {self.structural_mutation_surer!r}"
-            )
-            raise RuntimeError(error_string)
-
-class DefaultNeatGenomeConfig(NeatGenomeConfig):
+@dataclass
+class DefaultNeatGenomeConfig(NeatGenomeConfigGenericMixin):
     """
     Default settings (as provided by neat-python)
     """
+
     activation_default = "sigmoid"
     activation_mutate_rate = 0.0
     activation_options: str = "sigmoid"

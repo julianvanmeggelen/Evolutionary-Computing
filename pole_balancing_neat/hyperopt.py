@@ -17,9 +17,6 @@ from neat.genes import DefaultConnectionGene, DefaultNodeGene
 
 
 
-
-
-
 class DummyGenomeConfig:
     def __init__(self):
         self.node_indexer = count(1)

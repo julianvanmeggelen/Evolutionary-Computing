@@ -6,8 +6,9 @@ from hyper_parameter_optimization.config.revolve_neat_config import RevolveNeatC
 @dataclass
 class OptimizationRun:
     """
-    Stores the config, utility and other statistics of a run 
+    Stores the config, utility and other statistics of a run
     """
-    config: RevolveNeatConfig
+
     utility: float
-    statistics: dict[str, Any] #store arbitrary stats
+    statistics: dict[str, Any]  # store arbitrary stats
+    config: RevolveNeatConfig = None

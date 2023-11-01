@@ -10,4 +10,5 @@
 simple_ea_xor/__pycache__/config.cpython-310.pyc
 *.npy
 *.txt
-*.
+*.db
+*.sqlite
