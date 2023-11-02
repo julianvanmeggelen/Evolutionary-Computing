@@ -1,12 +1,10 @@
-# from hyper_parameter_optimization.optimization_objective import OptimizationObjective
 import optuna
 import numpy as np
+import dataclasses
 from spotPython.spot import spot
 from scipy.optimize import differential_evolution
 from hyper_parameter_optimization.config.revolve_neat_config import (
-    DefaultRevolveNeatConfig,
-    RevolveNeatConfig,
-    NON_NEAT_ARGS,
+    RevolveNeatConfig
 )
 from hyper_parameter_optimization.optimizer.optimization_objective import (
     OptimizationObjective,
@@ -23,10 +21,23 @@ class HyperOptimizer:
     Base class for several optimization framework backends
     """
 
-    def __init__(self, objective: OptimizationObjective, **tune_params):
+    def __init__(self, objective: OptimizationObjective, config_template: RevolveNeatConfig = None, **tune_params: dict[str,TunableParameter]):
+        """
+        args:
+            objective: A Callable that accepts a RevolveNeatConfig object and returns an OptimizationRun
+            config_template: the values for non-tuned parameters. If not provided the defaults as provided in RevolveNeatConfig are used.
+            tune_params: A dict of param_name: TunableParameter. param_name must exist in RevolveNeatConfig
+        """
         self.objective: OptimizationObjective = objective
-        self.tune_params: dict[str, TunableParameter] = tune_params
-        self.result: OptimizationResult = OptimizationResult()
+        self.tune_params = tune_params
+        self._config_template = config_template or RevolveNeatConfig()
+        self.result: OptimizationResult = OptimizationResult(tune_params = tune_params)
+
+    def _base_config(self):
+        """
+        Return a copy of the config_template
+        """
+        return self._config_template.copy()
 
     def _generate_config(self, *args, **kwargs) -> RevolveNeatConfig:
         """
@@ -61,36 +72,31 @@ class HyperOptimizer:
 class OptunaHyperOptimizer(HyperOptimizer):
     def _generate_config(self, trial) -> RevolveNeatConfig:
 
-        # start with default
-        config = DefaultRevolveNeatConfig()
+        # start with the base
+        config = self._base_config()
 
+        # set the generic params (e.g OFFSPRING_SIZE)
         for param_name, param in self.tune_params.items():
-
-            # determine wether to set neat config or not
-            relevant_config = (
-                config if param_name in NON_NEAT_ARGS else config.genome_config
-            )
-
-            if param_name not in relevant_config.__dict__:
+            if param_name not in config:
                 raise ValueError(f"Unrecognized parameter {param_name}")
 
             if type(param) is TunableFloat:
                 setattr(
-                    relevant_config,
+                    config,
                     param_name,
                     trial.suggest_float(param_name, param.min, param.max),
                 )
             else:
                 raise NotImplementedError(
                     "Only TunableFloats are supported by this backend"
-                )
-
+                )          
+       
         return config
 
     def run(self, n_trials=50, timeout=1200, n_jobs=1) -> OptimizationResult:
         study = optuna.create_study(direction="maximize")
         study.optimize(
-            self._internal_objective, n_trials=n_trials, n_jobs=n_jobs, timeout=timeout
+            self._internal_objective, n_jobs=n_jobs, timeout=timeout, n_trials=n_trials
         )
         return self.result
 
@@ -98,21 +104,16 @@ class OptunaHyperOptimizer(HyperOptimizer):
 class SpotHyperOptimizer(HyperOptimizer):
     def _generate_config(self, row) -> RevolveNeatConfig:
 
-        # start with default
-        config = DefaultRevolveNeatConfig()
+        # start with the base
+        config = self._base_config()
 
         for (param_name, param), param_val in zip(self.tune_params.items(), row):
 
-            # determine wether to set neat config or not
-            relevant_config = (
-                config if param_name in NON_NEAT_ARGS else config.genome_config
-            )
-
-            if param_name not in relevant_config.__dict__:
+            if param_name not in config.__dict__:
                 raise ValueError(f"Unrecognized parameter {param_name}")
 
             if type(param) is TunableFloat:
-                setattr(relevant_config, param_name, param_val)
+                setattr(config, param_name, param_val)
             else:
                 raise NotImplementedError(
                     "Only TunableFloats are supported by this backend"
@@ -120,7 +121,7 @@ class SpotHyperOptimizer(HyperOptimizer):
 
         return config
 
-    def run(self, n_trials=50, timeout=1200, n_jobs=1) -> OptimizationResult:
+    def run(self, timeout=1200, n_jobs=1) -> OptimizationResult:
         def spot_objective(X: np.ndarray, fun_control):
             # Layer between spot and _internal_objective
             y = np.empty((0, 1))

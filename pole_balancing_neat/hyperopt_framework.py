@@ -3,12 +3,13 @@ from hyper_parameter_optimization.optimizer.optimizer import OptunaHyperOptimize
 from hyper_parameter_optimization.result.optimization_run import OptimizationRun
 from hyper_parameter_optimization.result.optimization_result import OptimizationResult
 from hyper_parameter_optimization.optimizer.tunable_param import TunableFloat
-
 import main
-
 import os
-
 import sys
+import pandas as pd 
+pd.set_option('display.max_rows', 500)
+pd.set_option('display.max_columns', 500)
+pd.set_option('display.width', 1000)
 #sys.path.append('../')
 
 N_RUNS = 10
@@ -40,7 +41,7 @@ def objective(config: RevolveNeatConfig):
 
 if __name__ == "__main__":
 
-    optuna=False
+    optuna=True
     if optuna:
         #Optuna tuner
         tuner = OptunaHyperOptimizer(
@@ -60,9 +61,9 @@ if __name__ == "__main__":
             conn_delete_prob = TunableFloat(0.0,1),
         )
 
-    result = tuner.run(timeout=20)
+    result = tuner.run(timeout=600)
     result.save('tuneresult')
 
     loaded = OptimizationResult.load('tuneresult')
-    print(loaded.best_run().config)
+    print(loaded.summary())
 
