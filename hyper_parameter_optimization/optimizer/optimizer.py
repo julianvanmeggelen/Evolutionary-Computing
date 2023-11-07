@@ -90,11 +90,13 @@ class OptunaHyperOptimizer(HyperOptimizer):
                 raise NotImplementedError(
                     "Only TunableFloats are supported by this backend"
                 )          
-       
+
         return config
 
-    def run(self, n_trials=50, timeout=1200, n_jobs=1) -> OptimizationResult:
+    def run(self, n_trials=None, timeout=600, n_jobs=1) -> OptimizationResult:
         study = optuna.create_study(direction="maximize")
+        self._tuner = study
+
         study.optimize(
             self._internal_objective, n_jobs=n_jobs, timeout=timeout, n_trials=n_trials
         )
@@ -121,7 +123,7 @@ class SpotHyperOptimizer(HyperOptimizer):
 
         return config
 
-    def run(self, timeout=1200, n_jobs=1) -> OptimizationResult:
+    def run(self, n_trials=None, timeout=600, n_jobs=1) -> OptimizationResult:
         def spot_objective(X: np.ndarray, fun_control):
             # Layer between spot and _internal_objective
             y = np.empty((0, 1))
@@ -138,7 +140,7 @@ class SpotHyperOptimizer(HyperOptimizer):
             fun=spot_objective,  # objective function
             lower=lower,  # lower bound of the search space
             upper=upper,  # upper bound of the search space
-            fun_evals=15,  # default value
+            fun_evals=n_trials,  # default value
             max_time=timeout,  # 10 mins
             var_name=list(self.tune_params),
             show_progress=True,
@@ -152,4 +154,5 @@ class SpotHyperOptimizer(HyperOptimizer):
             X_start=X_start,
         )  # initial design points
 
+        self._tuner = spot_model
         return self.result
