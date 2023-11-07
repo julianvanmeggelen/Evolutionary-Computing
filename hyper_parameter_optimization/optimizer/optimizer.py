@@ -145,7 +145,6 @@ class SpotHyperOptimizer(HyperOptimizer):
             var_name=list(self.tune_params),
             show_progress=True,
             surrogate_control={
-                "n_theta": 6,
                 "model_optimizer": differential_evolution,
             },
             # fun_control= fun_control,
