@@ -141,7 +141,7 @@ class SpotHyperOptimizer(HyperOptimizer):
             lower=lower,  # lower bound of the search space
             upper=upper,  # upper bound of the search space
             fun_evals=n_trials,  # default value
-            max_time=timeout,  # 10 mins
+            max_time=timeout/60,  # timeout in mins
             var_name=list(self.tune_params),
             show_progress=True,
             surrogate_control={
