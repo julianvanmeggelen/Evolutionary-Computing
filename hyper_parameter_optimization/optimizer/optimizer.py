@@ -123,7 +123,7 @@ class SpotHyperOptimizer(HyperOptimizer):
 
         return config
 
-    def run(self, n_trials=None, timeout=600, n_jobs=1) -> OptimizationResult:
+    def run(self, n_trials=15, timeout=600, n_jobs=1) -> OptimizationResult:
         def spot_objective(X: np.ndarray, fun_control):
             # Layer between spot and _internal_objective
             y = np.empty((0, 1))
