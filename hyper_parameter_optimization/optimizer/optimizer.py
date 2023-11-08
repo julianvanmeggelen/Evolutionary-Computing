@@ -1,4 +1,5 @@
 import optuna
+import optuna.importance  
 import numpy as np
 import dataclasses
 from spotPython.spot import spot
@@ -31,7 +32,7 @@ class HyperOptimizer:
         self.objective: OptimizationObjective = objective
         self.tune_params = tune_params
         self._config_template = config_template or RevolveNeatConfig()
-        self.result: OptimizationResult = OptimizationResult(tune_params = tune_params)
+        self.result: OptimizationResult = OptimizationResult(tune_params = tune_params)    
 
     def _base_config(self):
         """
@@ -95,11 +96,13 @@ class OptunaHyperOptimizer(HyperOptimizer):
 
     def run(self, n_trials=None, timeout=600, n_jobs=1) -> OptimizationResult:
         study = optuna.create_study(direction="maximize")
-        self._tuner = study
+        self.result._tuner = study
 
         study.optimize(
             self._internal_objective, n_jobs=n_jobs, timeout=timeout, n_trials=n_trials
         )
+
+        self.result.importance = optuna.importance.get_param_importances(study)
         return self.result
 
 
@@ -153,5 +156,6 @@ class SpotHyperOptimizer(HyperOptimizer):
             X_start=X_start,
         )  # initial design points
 
-        self._tuner = spot_model
+        self.result._tuner = spot_model
+        self.result.importance = dict(spot_model.print_importance())
         return self.result

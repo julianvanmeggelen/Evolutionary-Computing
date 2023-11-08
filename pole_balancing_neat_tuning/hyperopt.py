@@ -38,14 +38,14 @@ def objective(config: RevolveNeatConfig) -> OptimizationRun:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--spot', default=0, type=bool)  #wether to use spot
+    parser.add_argument('--spot', default=0, type=int)  #wether to use spot
     parser.add_argument('--name', default=f"tuneresult_{datetime.now().strftime('%Y-%m-%d-%H:%M')}", type=str)  #path to save result
     parser.add_argument('--timeout', default=600, type=int)  #path to save result
     args = parser.parse_args()
 
     logging.info(f"Running with args: {args.spot=}, {args.name=}, {args.timeout=}")
 
-    if not args.spot:
+    if not bool(args.spot):
         #Optuna tuner
         logging.info("Using Optuna tuner")
         tuner = OptunaHyperOptimizer(

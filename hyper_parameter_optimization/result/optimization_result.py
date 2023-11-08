@@ -4,6 +4,7 @@ from hyper_parameter_optimization.result.optimization_run import OptimizationRun
 from hyper_parameter_optimization.optimizer.tunable_param import (
     TunableParameter
 )
+import matplotlib.pyplot as plt
 from dataclasses import dataclass, asdict
 import pandas as pd
 
@@ -15,15 +16,17 @@ class OptimizationResult:
     def __init__(self, tune_params: dict[str, TunableParameter], runs: list[OptimizationRun] = []):
         self.tune_params = tune_params
         self.runs: list[OptimizationRun] = []        
-        self._tuner = None #the tuner object used for tuning
+        self._tuner = None #the original tuner object used for tuning
+        self.importance: dict[str,float] = None
 
     @staticmethod
     def load(file_name):
         with open(file_name, "rb") as file:
-            tune_params, runs, _tuner = pickle.load(file)
+            tune_params, runs, _tuner, importance = pickle.load(file)
         ret = OptimizationResult(tune_params = tune_params)
         ret._tuner = _tuner
         ret.runs = runs
+        ret.importance = importance
         return ret
 
     def add(self, run: OptimizationRun):
@@ -42,8 +45,13 @@ class OptimizationResult:
             run_relevant_params = {k:v for k,v in run.config.dict().items() if k in tune_param_names}
             dict_item.update(run_relevant_params)
             dict_items.append(dict_item)
-        return pd.DataFrame(dict_items).sort_values(by='score', ascending=False)
+        df =  pd.DataFrame(dict_items).sort_values(by='score', ascending=False)
+        df = df.rename_axis('Parameter', axis=1)
+        df = df.rename_axis('Run', axis=0)
+        return df
 
+
+    
     def get_stats(self, key:str) -> list[Any]:
         """
         Return a list of all the statistics with key for all the runs
@@ -55,6 +63,18 @@ class OptimizationResult:
             )
         return ret
 
+    def plot_utility(self, use_timestamp=True):
+        """
+        Plot the utility over time
+        """
+        plt.figure()
+        utility_vals = [run.utility for run in self.runs]
+        x= [run.timestamp for run in self.runs] if use_timestamp else range(len(utility_vals))
+        plt.scatter(x, utility_vals)
+        plt.plot(utility_vals)
+        plt.xlabel('Tuning run')
+        plt.ylabel('Utility')
+
     def save(self, file_name: str):
         with open(file_name, "wb") as file:
-            pickle.dump((self.tune_params, self.runs, self._tuner), file)  # we only care about storing the runs
+            pickle.dump((self.tune_params, self.runs, self._tuner, self.importance), file)  # we only care about storing the runs
