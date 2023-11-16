@@ -15,8 +15,8 @@ import numpy.typing as npt
 from evaluate import evaluate
 from genotype import Genotype
 from individual import Individual
-from revolve2.ci_group.logging import setup_logging
-from revolve2.ci_group.rng import make_rng_time_seed
+from revolve2.experimentation.logging import setup_logging
+from revolve2.experimentation.rng import make_rng_time_seed
 from revolve2.experimentation.optimization.ea import population_management, selection
 
 from hyper_parameter_optimization.config.revolve_neat_config import RevolveNeatConfig

@@ -13,7 +13,8 @@ class OptimizationRun:
     utility: float
     statistics: list[dict[str, Any]]  #this stores arbitrary stats (one dict for each iteration)
     config: RevolveNeatConfig = None
-    timestamp: datetime = datetime.now()
+    start_timestamp: datetime = datetime.now()
+    finish_timestamp: datetime = None
     id: int = field(default_factory=count().__next__)
 
     def n_iterations(self):
