@@ -9,7 +9,7 @@ import os
 import sys
 import pandas as pd 
 import argparse
-from revolve2.ci_group.logging import setup_logging
+from revolve2.experimentation.logging import setup_logging
 import logging
 setup_logging()
 
@@ -66,7 +66,7 @@ if __name__ == "__main__":
             conn_delete_prob = TunableFloat(0.0,1),
         )
 
-    result = tuner.run(timeout=args.timeout)
+    result = tuner.run(timeout=args.timeout, n_jobs=-1)
     result.save(args.name)
 
     loaded = OptimizationResult.load(args.name)
