@@ -1,9 +1,12 @@
+from datetime import datetime, timedelta
 import optuna
 import optuna.importance  
 import numpy as np
 import dataclasses
 from spotPython.spot import spot
 from scipy.optimize import differential_evolution
+from functools import partial
+import logging
 from hyper_parameter_optimization.config.revolve_neat_config import (
     RevolveNeatConfig
 )
@@ -32,8 +35,8 @@ class HyperOptimizer:
         self.objective: OptimizationObjective = objective
         self.tune_params = tune_params
         self._config_template = config_template or RevolveNeatConfig()
-        self.result: OptimizationResult = OptimizationResult(tune_params = tune_params)    
-
+        self.result: OptimizationResult = OptimizationResult(tune_params = tune_params) 
+      
     def _base_config(self):
         """
         Return a copy of the config_template
@@ -50,7 +53,9 @@ class HyperOptimizer:
         """
         Evaluate the configuration and return the utility
         """
+        eval_bt = datetime.now()
         optimization_run = self.objective(config)
+        eval_et = datetime.now()
         optimization_run.config = config
         self.result.add(optimization_run)
         return optimization_run.utility
@@ -68,7 +73,26 @@ class HyperOptimizer:
         Calling this method starts the optimization process, several backends can accept different arguments
         """
         raise NotImplementedError
-
+    
+    def _pre_run(self):
+        """Hook that needs to be called at start of run
+        """
+        logging.level = logging.exception
+        self.bt = datetime.now()
+       
+    def _post_run(self):
+        """Hook that needs to be called at end of run
+        """
+        self.et = datetime.now()
+        self.total_time = self.et - self.bt
+        print("="*30)
+        print("Finished tuning run")
+        print(f"\t Total time: {self.total_time}")
+        n_runs = len(self.result.runs)
+        print(f"\t Total runs: {n_runs}")
+        total_time_minutes = self.total_time.total_seconds()/60
+        print(f"\t \t per minute: {n_runs/total_time_minutes}")
+        print("="*30)
 
 class OptunaHyperOptimizer(HyperOptimizer):
     def _generate_config(self, trial) -> RevolveNeatConfig:
@@ -94,7 +118,8 @@ class OptunaHyperOptimizer(HyperOptimizer):
 
         return config
 
-    def run(self, n_trials=None, timeout=600, n_jobs=1) -> OptimizationResult:
+    def run(self, n_trials=None, timeout=600, n_jobs=-1) -> OptimizationResult:
+        self._pre_run()
         study = optuna.create_study(direction="maximize")
         self.result._tuner = study
 
@@ -103,6 +128,7 @@ class OptunaHyperOptimizer(HyperOptimizer):
         )
 
         self.result.importance = optuna.importance.get_param_importances(study)
+        self._post_run()
         return self.result
 
 
@@ -126,21 +152,23 @@ class SpotHyperOptimizer(HyperOptimizer):
 
         return config
 
-    def run(self, n_trials=15, timeout=600, n_jobs=1) -> OptimizationResult:
-        def spot_objective(X: np.ndarray, fun_control):
+    def _spot_objective(self, X: np.ndarray, fun_control):
             # Layer between spot and _internal_objective
             y = np.empty((0, 1))
             for row in X:
                 utility = self._internal_objective(row=row)
                 y = np.append(y, -utility)
             return y
+    
+    def run(self, n_trials=15, timeout=600, n_jobs=-1) -> OptimizationResult:
+        self._pre_run()
 
         X_start = np.array([param.init for param in self.tune_params.values()])
         lower = np.array([param.min for param in self.tune_params.values()])
         upper = np.array([param.max for param in self.tune_params.values()])
 
         spot_model = spot.Spot(
-            fun=spot_objective,  # objective function
+            fun=partial(self._spot_objective),  # objective function
             lower=lower,  # lower bound of the search space
             upper=upper,  # upper bound of the search space
             fun_evals=n_trials,  # default value
@@ -158,4 +186,5 @@ class SpotHyperOptimizer(HyperOptimizer):
 
         self.result._tuner = spot_model
         self.result.importance = dict(spot_model.print_importance())
+        self._post_run()
         return self.result
