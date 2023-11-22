@@ -11,7 +11,7 @@ Single-pole balancing experiment using a feed-forward neural network.
 import cart_pole
 import neat
 
-runs_per_net = 5
+runs_per_net = 1
 simulation_seconds = 60.0
 
 
