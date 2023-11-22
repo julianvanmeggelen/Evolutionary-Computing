@@ -13,7 +13,7 @@ class NeatGenomeConfigGenericMixin:
     activation_defs: ActivationFunctionSet = ActivationFunctionSet()
     aggregation_function_defs: AggregationFunctionSet = AggregationFunctionSet()
     aggregation_defs = aggregation_function_defs
-    node_indexer: count = count(1)
+    node_indexer: count = count(100, 1)
 
     @property
     def output_keys(self):

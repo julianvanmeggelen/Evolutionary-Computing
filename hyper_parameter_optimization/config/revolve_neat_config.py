@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass, replace, asdict
 from functools import cache
 from hyper_parameter_optimization.config.neat_genome_config import (
@@ -11,6 +12,7 @@ class RevolveNeatConfig(NeatGenomeConfigGenericMixin):
     OFFSPRING_SIZE: int = 10
     NUM_EVALS: int = 200
     NUM_GENERATIONS: int = 100
+    NUM_SIMULATORS: int = None #uses all cores
 
     #Neat config 
     activation_default = "sigmoid"
@@ -61,6 +63,14 @@ class RevolveNeatConfig(NeatGenomeConfigGenericMixin):
     response_init_type: str = "gaussian"
     weight_init_type: str = "gaussian"
 
+    #body specific
+    body_num_inputs: int = 5
+    body_num_outputs:int = 5
+
+    #brain specific:
+    brain_num_inputs: int = 7
+    brain_num_outputs: int = 1
+
     # Neat genome config (neat accesses the config via config.genome_config)
     @property
     def genome_config(self):
@@ -68,11 +78,32 @@ class RevolveNeatConfig(NeatGenomeConfigGenericMixin):
 
     def copy(self):
         return replace(self)
+    
+    def _replace_prefix(self, prefix) -> RevolveNeatConfig:
+        """replace num_inputs with brain_num_inputs
+        """
+        all_slots = self._slots()
+        replace_dict = {}
+        for slot in all_slots:
+            if slot.startswith(prefix):
+                replace_key = slot.split(prefix)[1]
+                replace_dict[replace_key] = getattr(self, slot)
+        return replace(self, **replace_dict)
+
+    def brain_config(self) -> RevolveNeatConfig:
+        """replace num_inputs with brain_num_inputs
+        """
+        return self._replace_prefix('brain_')
+
+    def body_config(self) -> RevolveNeatConfig:
+        """replace num_inputs with body_num_inputs
+        """
+        return self._replace_prefix('body_')
+
 
     def dict(self):
         return asdict(self)
 
-    @cache
     def _slots(self):
         return [k for k in self.__dict__ if not k.startswith('_') or k == 'genome_config']
 

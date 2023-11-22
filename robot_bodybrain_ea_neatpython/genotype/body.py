@@ -9,6 +9,7 @@ from revolve2.modular_robot.body import Module
 from revolve2.modular_robot.body.v1 import ActiveHingeV1, BodyV1, BrickV1, CoreV1
 
 from hyper_parameter_optimization.config.revolve_neat_config import RevolveNeatConfig
+from robot_bodybrain_ea_neatpython.genotype.genotype_base import BaseNeatGenotype
 
 
 # @dataclass
@@ -19,6 +20,9 @@ from hyper_parameter_optimization.config.revolve_neat_config import RevolveNeatC
 #     chain_length: int
 #     module_reference: Module
 
+class BodyGenotype(BaseNeatGenotype):
+    def develop(self):
+        return develop(self.neatGenome, self.config)
 
 def develop(
     genotype: neat.DefaultGenome,
@@ -36,7 +40,6 @@ def develop(
     max_parts = 10
 
     body_net = neat.nn.FeedForwardNetwork.create(genotype, config)
-    genotype.BuildPhenotype(body_net)
 
     to_explore: Queue[__Module] = Queue()
     grid: set[tuple[int, int, int]] = set()
@@ -89,11 +92,10 @@ def __evaluate_cppn(
     :param chain_length: Tree distance of the module from the core.
     :returns: (module type, orientation)
     """
-    body_net.Input(
+   
+    outputs =  body_net.activate(
         [1.0, position[0], position[1], position[2], chain_length]
-    )  # 1.0 is the bias input
-    body_net.ActivateAllLayers()
-    outputs = body_net.Output()
+    )
 
     # get module type from output probabilities
     type_probs = [outputs[0], outputs[1], outputs[2]]

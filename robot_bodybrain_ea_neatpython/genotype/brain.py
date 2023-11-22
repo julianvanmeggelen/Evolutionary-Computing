@@ -1,11 +1,26 @@
+from __future__ import annotations
 from abc import ABC
 from revolve2.modular_robot import ModularRobot
 from revolve2.modular_robot.brain.cpg import BrainCpgNetworkNeighbor
 from revolve2.modular_robot.body.base import ActiveHinge, Body
 from hyper_parameter_optimization.config.revolve_neat_config import RevolveNeatConfig
 import neat
+from neat import DefaultGenome
+from dataclasses import dataclass
+import numpy as np
+from typing_extensions import Self
+from revolve2.modular_robot.body.base import Body
 
-# this must be rewritten to use neat-python
+from robot_bodybrain_ea_neatpython.genotype.genotype_base import BaseNeatGenotype
+
+@dataclass
+class BrainGenotype(BaseNeatGenotype):
+    def __init__(self, neatGenome: DefaultGenome, config: RevolveNeatConfig):
+        super().__init__(neatGenome,config)
+
+    def develop(self, body):
+        return BrainCpgNetworkNeighborV1(genotype=self.neatGenome, body=body, config=self.config)
+
 class BrainCpgNetworkNeighborV1(BrainCpgNetworkNeighbor):
     """
     A CPG brain based on `ModularRobotBrainCpgNetworkNeighbor` that creates weights from a CPPNWIN network.
