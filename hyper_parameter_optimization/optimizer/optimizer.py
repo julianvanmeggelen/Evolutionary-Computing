@@ -168,7 +168,7 @@ class SpotHyperOptimizer(HyperOptimizer):
         upper = np.array([param.max for param in self.tune_params.values()])
 
         spot_model = spot.Spot(
-            fun=partial(self._spot_objective),  # objective function
+            fun=self._spot_objective,  # objective function
             lower=lower,  # lower bound of the search space
             upper=upper,  # upper bound of the search space
             fun_evals=n_trials,  # default value
@@ -184,6 +184,7 @@ class SpotHyperOptimizer(HyperOptimizer):
             X_start=X_start,
         )  # initial design points
 
+        spot_model.fun = None #remove the fun before saving, it is not needed
         self.result._tuner = spot_model
         self.result.importance = dict(spot_model.print_importance())
         self._post_run()

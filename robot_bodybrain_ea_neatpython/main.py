@@ -27,6 +27,8 @@ import neat
 
 from robot_bodybrain_ea_neatpython.evaluator import Evaluator
 
+# Set up standard logging.
+setup_logging()
 
 def select_parents(
     rng: np.random.Generator,
@@ -107,8 +109,6 @@ def main(config: RevolveNeatConfig, plot=True, callback=None, save_winner = Fals
             net_size_connections = The sizes (measured in #connections) of the nets in the last generation
             all_fitness: A list with all the fitness values of the individuals in the last generation
     """
-    # Set up standard logging.
-    setup_logging()
 
     evaluator = Evaluator(headless=True, num_simulators=config.NUM_SIMULATORS)
 
@@ -195,8 +195,8 @@ def main(config: RevolveNeatConfig, plot=True, callback=None, save_winner = Fals
         with open('winner-feedforward', 'wb') as f:
             pickle.dump(winner, f)
 
-    net_size_nodes = [len(ind.genotype.neatGenome.nodes) for ind in population] 
-    net_size_connections = [len(ind.genotype.neatGenome.connections) for ind in population]
+    net_size_nodes = [len(ind.genotype.brain.neatGenome.nodes) for ind in population] 
+    net_size_connections = [len(ind.genotype.brain.neatGenome.connections) for ind in population]
     all_fitness = [ind.fitness for ind in population]
 
     stats = dict(
@@ -213,5 +213,5 @@ def main(config: RevolveNeatConfig, plot=True, callback=None, save_winner = Fals
     return fitness, stats
 
 if __name__ == "__main__":
-    config = RevolveNeatConfig(body_num_inputs=5, body_num_outputs=5, brain_num_inputs=7, brain_num_outputs=1) #default config
+    config = RevolveNeatConfig(body_num_inputs=5, body_num_outputs=5, brain_num_inputs=7, brain_num_outputs=1, POPULATION_SIZE=100, OFFSPRING_SIZE=50) #default config
     main(config)

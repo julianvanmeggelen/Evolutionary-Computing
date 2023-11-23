@@ -17,7 +17,7 @@ pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 
-N_RUNS = 10
+N_RUNS = 5
 def objective(config: RevolveNeatConfig) -> OptimizationRun:
     """Define the objective.
     :param config: the config that should be evaluated

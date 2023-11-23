@@ -93,6 +93,8 @@ def select_survivors(
         for i in offspring_survivors
     ]
 
+setup_logging()
+
 def main(config: RevolveNeatConfig, plot=True, callback=None, save_winner = False, verbose=1) -> None:
     """Does a single optimization run.
     
@@ -107,7 +109,6 @@ def main(config: RevolveNeatConfig, plot=True, callback=None, save_winner = Fals
             all_fitness: A list with all the fitness values of the individuals in the last generation
     """
     # Set up standard logging.
-    setup_logging()
 
     # Set up the random number generater.
     rng = make_rng_time_seed()
