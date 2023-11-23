@@ -1,0 +1,60 @@
+{
+    "DummyModel": {
+        "activation_default": {
+            "levels": [
+                "sigmoid",
+                "tanh",
+                "relu",
+                "clamped"
+            ],
+            "type": "factor",
+            "default": "clamped",
+            "transform": "None",
+            "core_model_parameter_type": "str",
+            "lower": 0,
+            "upper": 3
+        },
+        "bias_mutate_power": {
+            "type": "float",
+            "default": 0.5,
+            "transform": "None",
+            "lower": 0.1,
+            "upper": 2.0
+        },
+        "bias_replace_rate": {
+            "type": "float",
+            "default": 0.1,
+            "transform": "None",
+            "lower": 0.0,
+            "upper": 1.0
+        },
+        "conn_add_prob": {
+            "type": "float",
+            "default": 0.2,
+            "transform": "None",
+            "lower": 0.0,
+            "upper": 1.0
+        },
+        "conn_delete_prob": {
+            "type": "float",
+            "default": 0.2,
+            "transform": "None",
+            "lower": 0.0,
+            "upper": 1.0
+        },
+        "node_add_prob": {
+            "type": "float",
+            "default": 0.2,
+            "transform": "None",
+            "lower": 0.1,
+            "upper": 1.0
+        },
+        "node_delete_prob": {
+            "type": "float",
+            "default": 0.2,
+            "transform": "None",
+            "lower": 0.1,
+            "upper": 1.0
+        }
+    }
+}
