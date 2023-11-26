@@ -9,7 +9,7 @@ PYTHONPATH=. python pole_balancing_neat_tuning/hyperopt.py --name tune_results -
 To run with the Optuna tuner
 
 ```
-PYTHONPATH=. python pole_balancing_neat_tuning/hyperopt.py --name tune_results--spot 0 --timeout 1200
+PYTHONPATH=. python pole_balancing_neat_tuning/hyperopt.py --name tune_results --spot 0 --timeout 1200
 ```
 
 To visualize the tuning results:
