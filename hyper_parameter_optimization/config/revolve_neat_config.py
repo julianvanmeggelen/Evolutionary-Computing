@@ -15,8 +15,8 @@ class RevolveNeatConfig(NeatGenomeConfigGenericMixin):
     NUM_SIMULATORS: int = None #uses all cores
 
     #Neat config 
-    activation_default = "sigmoid"
-    activation_mutate_rate = 0.0
+    activation_default: str = "sigmoid"
+    activation_mutate_rate: float = 0.0
     activation_options: str = "sigmoid"
     aggregation_default: str = "sum"
     aggregation_mutate_rate: float = 0.0
