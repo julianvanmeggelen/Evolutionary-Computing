@@ -3,7 +3,7 @@ from hyper_parameter_optimization.config.revolve_neat_config import RevolveNeatC
 from hyper_parameter_optimization.optimizer.optimizer import OptunaHyperOptimizer, SpotHyperOptimizer
 from hyper_parameter_optimization.result.optimization_run import OptimizationRun
 from hyper_parameter_optimization.result.optimization_result import OptimizationResult
-from hyper_parameter_optimization.optimizer.tunable_param import TunableFloat
+from hyper_parameter_optimization.optimizer.tunable_param import TunableCategory, TunableFloat
 import main
 import os
 import sys
@@ -64,6 +64,7 @@ if __name__ == "__main__":
             bias_replace_rate = TunableFloat(0.0,1),
             conn_add_prob = TunableFloat(0.0,1),
             conn_delete_prob = TunableFloat(0.0,1),
+            activation_default = TunableCategory(["sigmoid", "tanh", "relu", "identity"], init="sigmoid"),
         )
 
     result = tuner.run(timeout=args.timeout, n_jobs=-1)
