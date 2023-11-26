@@ -1,9 +1,11 @@
 from enum import IntEnum, auto
 from dataclasses import dataclass
+from typing import List
 
 
 class TunableDataType(IntEnum):
     float = auto()
+    category = auto()
 
 
 class TunableParameter:
@@ -16,3 +18,9 @@ class TunableFloat(TunableParameter):
     max: float
     type: TunableDataType = TunableDataType.float
     init: float = None
+
+@dataclass
+class TunableCategory(TunableParameter):
+    categories: List[str]
+    type: TunableDataType = TunableDataType.category
+    init: str = None
