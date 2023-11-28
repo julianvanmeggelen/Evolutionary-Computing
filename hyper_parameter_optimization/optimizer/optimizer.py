@@ -126,6 +126,14 @@ class OptunaHyperOptimizer(HyperOptimizer):
                     param_name,
                     trial.suggest_float(param_name, param.min, param.max),
                 )
+
+            elif type(param) is TunableCategory:
+                setattr(
+                    config,
+                    param_name,
+                    trial.suggest_categorical(param_name, param.categories),
+                )
+                
             else:
                 raise NotImplementedError(
                     "Only TunableFloats are supported by this backend"
@@ -194,7 +202,10 @@ class SpotHyperOptimizer(HyperOptimizer):
         var_name = get_var_name(fun_control)
         lower = get_bound_values(fun_control, "lower")
         upper = get_bound_values(fun_control, "upper")
-        X_start = get_default_hyperparameters_as_array(fun_control) # !!! default value (param.init) should not be None
+        # TODO: !!! default value (param.init) should not be None
+        # currently, tunable float ones are none and they're set as the mean of min and max
+        # but when some are none and some are not then it triggers an error from spot
+        X_start = get_default_hyperparameters_as_array(fun_control) 
 
         spot_model = spot.Spot(
             fun=self._spot_objective,  # objective function

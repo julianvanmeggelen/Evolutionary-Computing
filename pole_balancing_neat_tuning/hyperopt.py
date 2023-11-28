@@ -54,6 +54,7 @@ if __name__ == "__main__":
             bias_replace_rate = TunableFloat(0.0,1),
             conn_add_prob = TunableFloat(0.0,1),
             conn_delete_prob = TunableFloat(0.0,1),
+            activation_default = TunableCategory(["sigmoid", "tanh", "relu", "identity"], init="sigmoid"),
         )
     else:
         #Spot
