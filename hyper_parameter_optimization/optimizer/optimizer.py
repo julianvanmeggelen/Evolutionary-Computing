@@ -19,6 +19,21 @@ from hyper_parameter_optimization.optimizer.tunable_param import (
 )
 from hyper_parameter_optimization.result.optimization_result import OptimizationResult
 
+from spotPython.hyperparameters.values import (
+    add_core_model_to_fun_control,
+    assign_values,
+    generate_one_config_from_var_dict,
+    get_bound_values,
+    get_default_hyperparameters_as_array,
+    get_var_name,
+    get_var_type,
+)
+from hyper_parameter_optimization.optimizer.spot_specific import DummyModel, SpotHyperDict
+import json
+from typing import Dict
+from hyper_parameter_optimization.optimizer.tunable_param import TunableParameter, TunableFloat, TunableCategory, TunableDataType
+
+
 
 class HyperOptimizer:
     """
@@ -111,6 +126,14 @@ class OptunaHyperOptimizer(HyperOptimizer):
                     param_name,
                     trial.suggest_float(param_name, param.min, param.max),
                 )
+
+            elif type(param) is TunableCategory:
+                setattr(
+                    config,
+                    param_name,
+                    trial.suggest_categorical(param_name, param.categories),
+                )
+                
             else:
                 raise NotImplementedError(
                     "Only TunableFloats are supported by this backend"
@@ -134,6 +157,7 @@ class OptunaHyperOptimizer(HyperOptimizer):
 
 class SpotHyperOptimizer(HyperOptimizer):
     def _generate_config(self, row) -> RevolveNeatConfig:
+        # TODO: spot has some methods to create a dict from the "row"
 
         # start with the base
         config = self._base_config()
@@ -145,6 +169,10 @@ class SpotHyperOptimizer(HyperOptimizer):
 
             if type(param) is TunableFloat:
                 setattr(config, param_name, param_val)
+
+            elif type(param) is TunableCategory:
+                setattr(config, param_name, param.categories[int(param_val)])
+
             else:
                 raise NotImplementedError(
                     "Only TunableFloats are supported by this backend"
@@ -157,15 +185,27 @@ class SpotHyperOptimizer(HyperOptimizer):
             y = np.empty((0, 1))
             for row in X:
                 utility = self._internal_objective(row=row)
+                print(f"Row: {row}, Utility: {utility}")
                 y = np.append(y, -utility)
             return y
     
     def run(self, n_trials=15, timeout=600, n_jobs=-1) -> OptimizationResult:
         self._pre_run()
 
-        X_start = np.array([param.init for param in self.tune_params.values()])
-        lower = np.array([param.min for param in self.tune_params.values()])
-        upper = np.array([param.max for param in self.tune_params.values()])
+        fun_control = {}
+        self.generate_hyper_spot_json(self.tune_params)
+        add_core_model_to_fun_control(core_model=DummyModel,
+                              fun_control=fun_control,
+                              hyper_dict=SpotHyperDict,
+                              filename=None)
+        var_type = get_var_type(fun_control)
+        var_name = get_var_name(fun_control)
+        lower = get_bound_values(fun_control, "lower")
+        upper = get_bound_values(fun_control, "upper")
+        # TODO: !!! default value (param.init) should not be None
+        # currently, tunable float ones are none and they're set as the mean of min and max
+        # but when some are none and some are not then it triggers an error from spot
+        X_start = get_default_hyperparameters_as_array(fun_control) 
 
         spot_model = spot.Spot(
             fun=self._spot_objective,  # objective function
@@ -173,10 +213,11 @@ class SpotHyperOptimizer(HyperOptimizer):
             upper=upper,  # upper bound of the search space
             fun_evals=n_trials,  # default value
             max_time=timeout/60,  # timeout in mins
-            var_name=list(self.tune_params),
+            var_name=var_name,
+            var_type=var_type,
             show_progress=True,
             surrogate_control={
-                "model_optimizer": differential_evolution,
+                "n_theta": len(var_name),
             },
             # fun_control= fun_control,
         )
@@ -189,3 +230,32 @@ class SpotHyperOptimizer(HyperOptimizer):
         self.result.importance = dict(spot_model.print_importance())
         self._post_run()
         return self.result
+    
+
+
+    def generate_hyper_spot_json(self, params: Dict[str, TunableParameter]) -> None:
+        hyper_spot_data = {"DummyModel": {}}
+        for param_name, param in params.items():
+            if isinstance(param, TunableFloat):
+                # TODO: change the logic for default value
+                default_value = param.init if param.init is not None else (param.min + param.max) / 2
+                hyper_spot_data["DummyModel"][param_name] = {
+                    "type": "float",
+                    "default": default_value,
+                    "transform": "None",
+                    "lower": param.min,
+                    "upper": param.max
+                }
+            elif isinstance(param, TunableCategory):
+                hyper_spot_data["DummyModel"][param_name] = {
+                    "type": "factor",
+                    "default": param.init,
+                    "transform": "None",
+                    "core_model_parameter_type": "str",
+                    "lower": 0,
+                    "upper": len(param.categories) - 1,
+                    "levels": param.categories
+                }
+        
+        with open('hyper_spot_generated.json', 'w') as file:
+            json.dump(hyper_spot_data, file, indent=4)
