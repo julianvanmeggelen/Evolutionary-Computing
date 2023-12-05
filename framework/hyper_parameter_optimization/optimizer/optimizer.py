@@ -230,8 +230,6 @@ class SpotHyperOptimizer(HyperOptimizer):
         self.result.importance = dict(spot_model.print_importance())
         self._post_run()
         return self.result
-    
-
 
     def generate_hyper_spot_json(self, params: Dict[str, TunableParameter]) -> None:
         hyper_spot_data = {"DummyModel": {}}

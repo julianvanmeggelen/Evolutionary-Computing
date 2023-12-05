@@ -9,8 +9,8 @@ import neat
 import numpy as np
 from neat.genome import DefaultGenome, DefaultGenomeConfig
 
-from robot_bodybrain_ea_neatpython.genotype.body import BodyGenotype
-from robot_bodybrain_ea_neatpython.genotype.brain import BrainGenotype
+from genotype.body import BodyGenotype
+from genotype.brain import BrainGenotype
 
 class Genotype():
     def __init__(self, body: BodyGenotype, brain: BrainGenotype) -> None:
