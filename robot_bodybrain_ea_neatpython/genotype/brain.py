@@ -11,7 +11,7 @@ import numpy as np
 from typing_extensions import Self
 from revolve2.modular_robot.body.base import Body
 
-from robot_bodybrain_ea_neatpython.genotype.genotype_base import BaseNeatGenotype
+from genotype.genotype_base import BaseNeatGenotype
 
 @dataclass
 class BrainGenotype(BaseNeatGenotype):

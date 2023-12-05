@@ -9,7 +9,7 @@ from revolve2.modular_robot.body import Module
 from revolve2.modular_robot.body.v1 import ActiveHingeV1, BodyV1, BrickV1, CoreV1
 
 from hyper_parameter_optimization.config.revolve_neat_config import RevolveNeatConfig
-from robot_bodybrain_ea_neatpython.genotype.genotype_base import BaseNeatGenotype
+from genotype.genotype_base import BaseNeatGenotype
 
 
 # @dataclass
