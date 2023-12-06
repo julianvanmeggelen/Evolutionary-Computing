@@ -12,7 +12,8 @@ from neat.genome import DefaultGenome, DefaultGenomeConfig
 from genotype.body import BodyGenotype
 from genotype.brain import BrainGenotype
 
-class Genotype():
+
+class Genotype:
     def __init__(self, body: BodyGenotype, brain: BrainGenotype) -> None:
         self.body = body
         self.brain = brain
@@ -22,30 +23,25 @@ class Genotype():
         """Initialize the body and brain"""
         return Genotype(
             body=BodyGenotype.random(rng, config.body_config()),
-            brain=BrainGenotype.random(rng, config.brain_config())
+            brain=BrainGenotype.random(rng, config.brain_config()),
         )
-    
+
     def mutate(self, rng) -> Genotype:
         """Mutate the body and brain"""
-        return Genotype(
-            body=self.body.mutate(rng),
-            brain=self.brain.mutate(rng)
-        )
-    
+        return Genotype(body=self.body.mutate(rng), brain=self.brain.mutate(rng))
+
     @classmethod
-    def crossover(self, parent1, parent2, rng, config: RevolveNeatConfig ) -> Genotype:
+    def crossover(self, parent1, parent2, rng, config: RevolveNeatConfig) -> Genotype:
         """Do crossover on the body and brain"""
         return Genotype(
-            body=BodyGenotype.crossover(parent1.body, parent2.body, rng, config.body_config()),
-            brain=BrainGenotype.crossover(parent1.brain, parent2.brain, rng, config.brain_config())
+            body=BodyGenotype.crossover(
+                parent1.body, parent2.body, rng, config.body_config()
+            ),
+            brain=BrainGenotype.crossover(
+                parent1.brain, parent2.brain, rng, config.brain_config()
+            ),
         )
 
-    def develop(self) -> ModularRobot: 
+    def develop(self) -> ModularRobot:
         body = self.body.develop()
-        return ModularRobot(
-            body = body,
-            brain = self.brain.develop(body)
-        )
-        
-
-
+        return ModularRobot(body=body, brain=self.brain.develop(body))

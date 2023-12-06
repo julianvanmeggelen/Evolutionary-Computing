@@ -9,7 +9,7 @@ You learn:
 
 import logging
 import math
-
+import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
 from genotype.genotype import Genotype
@@ -28,7 +28,7 @@ import neat
 from evaluator import Evaluator
 
 # Set up standard logging.
-setup_logging()
+setup_logging(level=logging.ERROR)
 
 
 def select_parents(
@@ -189,6 +189,7 @@ def main(
 
         # Increase the generation index counter.
         generation_index += 1
+        print(generation_index, maxs[-1])
     if plot:
         import matplotlib.pyplot as plt
 
@@ -202,7 +203,7 @@ def main(
 
     if save_winner:
         winner = max(population, key=lambda individual: individual.fitness)
-        with open("winner-feedforward", "wb") as f:
+        with open("winner-feedforward7", "wb") as f:
             pickle.dump(winner, f)
 
     net_size_nodes = [len(ind.genotype.brain.neatGenome.nodes) for ind in population]
@@ -221,14 +222,52 @@ def main(
     )
     fitness = maxs[-1]
 
-    plt.plot(maxs)
-    plt.plot(mins)
-    plt.plot(means)
-
     return fitness, stats
 
 
+def run_multiple(config, n=5):
+    all_mins = []
+    all_means = []
+    all_maxs = []
+    for i in range(n):
+        fitness, stats = main(config, plot=False)
+        print(pickle.dumps(stats))
+        try:
+            pickle.dump(stats, f"stats_{i}.pkl")
+        except Exception as e:
+            print(e)
+
+        all_mins.append(stats['mins'])
+        all_maxs.append(stats['maxs'])
+        all_means.append(stats['means'])
+        
+    print("plotting")
+    plt.figure()
+    print(len(all_means))
+    print(len(all_means[0]))
+    x=  range(len(all_means[0]))
+    y = np.mean(all_means, axis=0)
+    plt.plot(y, color='red', label='mean')
+    plt.fill_between(x, y-np.std(all_means, axis=0), y+np.std(all_means, axis=0), color='red', alpha=0.2)
+
+
+    y = np.mean(all_maxs, axis=0)
+    plt.plot(y, color='blue', label='max')
+    plt.fill_between(x, y-np.std(all_maxs, axis=0), y+np.std(all_maxs, axis=0), color='blue', alpha=0.2)
+
+
+    plt.plot(np.mean(all_mins, axis=0), label= 'min')
+    y = np.mean(all_mins, axis=0)
+    plt.fill_between(x, y-np.std(all_mins, axis=0), y+np.std(all_mins, axis=0) )
+    plt.xlabel("Generation index")
+    plt.ylabel("Fitness")
+    plt.title("Mean and max fitness across repetitions with std as shade")
+
+
 if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+    plt.plot(range(10))
+    plt.show()
     config = RevolveNeatConfig(
         body_num_inputs=5,
         body_num_outputs=5,
@@ -236,5 +275,7 @@ if __name__ == "__main__":
         brain_num_outputs=1,
         POPULATION_SIZE=100,
         OFFSPRING_SIZE=50,
+        NUM_GENERATIONS=100
     )  # default config
-    main(config, plot=True)
+    #main(config, plot=True)
+    run_multiple(config, 5)

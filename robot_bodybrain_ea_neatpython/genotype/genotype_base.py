@@ -8,11 +8,13 @@ import neat
 import numpy as np
 from neat.genome import DefaultGenome, DefaultGenomeConfig
 from typing_extensions import Self
+
 indexer = count(1)
 
+
 class BaseNeatGenotype:
-    """Most basic neat-python based genotype, meant for use as a baseclass 
-    """
+    """Most basic neat-python based genotype, meant for use as a baseclass"""
+
     indexer = count(1)
 
     def __init__(self, neatGenome: DefaultGenome, config: RevolveNeatConfig):
@@ -21,9 +23,7 @@ class BaseNeatGenotype:
 
     @classmethod
     def random(
-        cls,
-        rng: np.random.Generator,
-        config: RevolveNeatConfig
+        cls, rng: np.random.Generator, config: RevolveNeatConfig
     ) -> BaseNeatGenotype:
         """
         Create a random genotype.
@@ -35,10 +35,7 @@ class BaseNeatGenotype:
         ret.configure_new(config)
         return cls(ret, config)
 
-    def mutate(
-        self,
-        rng: np.random.Generator
-    ) -> Self:
+    def mutate(self, rng: np.random.Generator) -> Self:
         """
         Mutate this genotype.
 
@@ -50,10 +47,7 @@ class BaseNeatGenotype:
         neatGenomeCopy = copy.deepcopy(self.neatGenome)
         neatGenomeCopy.key = next(self.indexer)
         neatGenomeCopy.mutate(self.config)
-        return type(self)(
-            neatGenomeCopy,
-            self.config
-        )
+        return type(self)(neatGenomeCopy, self.config)
 
     @classmethod
     def crossover(
@@ -61,7 +55,7 @@ class BaseNeatGenotype:
         parent1: BaseNeatGenotype,
         parent2: BaseNeatGenotype,
         rng: np.random.Generator,
-        config: RevolveNeatConfig
+        config: RevolveNeatConfig,
     ) -> BaseNeatGenotype:
         """
         Perform uniform crossover between two genotypes.
@@ -74,6 +68,3 @@ class BaseNeatGenotype:
         child = DefaultGenome(next(cls.indexer))
         child.configure_crossover(parent1.neatGenome, parent2.neatGenome, config)
         return cls(child, config)
-    
-
-
