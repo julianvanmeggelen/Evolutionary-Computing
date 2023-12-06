@@ -2,7 +2,14 @@ import math
 from dataclasses import dataclass
 from queue import Queue
 from typing import Any
-from revolve2.ci_group.genotypes.cppnwin.modular_robot.v1._body_develop import __Module, __add, __timesscalar, __cross, __dot, __rotate
+from revolve2.ci_group.genotypes.cppnwin.modular_robot.v1._body_develop import (
+    __Module,
+    __add,
+    __timesscalar,
+    __cross,
+    __dot,
+    __rotate,
+)
 import neat
 
 from revolve2.modular_robot.body import Module
@@ -20,14 +27,13 @@ from genotype.genotype_base import BaseNeatGenotype
 #     chain_length: int
 #     module_reference: Module
 
+
 class BodyGenotype(BaseNeatGenotype):
     def develop(self):
         return develop(self.neatGenome, self.config)
 
-def develop(
-    genotype: neat.DefaultGenome,
-    config: RevolveNeatConfig
-) -> BodyV1:
+
+def develop(genotype: neat.DefaultGenome, config: RevolveNeatConfig) -> BodyV1:
     """
     Develop a CPPNWIN genotype into a modular robot body.
 
@@ -92,8 +98,8 @@ def __evaluate_cppn(
     :param chain_length: Tree distance of the module from the core.
     :returns: (module type, orientation)
     """
-   
-    outputs =  body_net.activate(
+
+    outputs = body_net.activate(
         [1.0, position[0], position[1], position[2], chain_length]
     )
 
@@ -142,4 +148,3 @@ def __add_child(
         chain_length,
         child,
     )
-

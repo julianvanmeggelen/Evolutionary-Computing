@@ -13,13 +13,17 @@ from revolve2.modular_robot.body.base import Body
 
 from genotype.genotype_base import BaseNeatGenotype
 
+
 @dataclass
 class BrainGenotype(BaseNeatGenotype):
     def __init__(self, neatGenome: DefaultGenome, config: RevolveNeatConfig):
-        super().__init__(neatGenome,config)
+        super().__init__(neatGenome, config)
 
     def develop(self, body):
-        return BrainCpgNetworkNeighborV1(genotype=self.neatGenome, body=body, config=self.config)
+        return BrainCpgNetworkNeighborV1(
+            genotype=self.neatGenome, body=body, config=self.config
+        )
+
 
 class BrainCpgNetworkNeighborV1(BrainCpgNetworkNeighbor):
     """
@@ -30,7 +34,9 @@ class BrainCpgNetworkNeighborV1(BrainCpgNetworkNeighbor):
     If the weight in internal, hinge1 and hinge2 position will be the same.
     """
 
-    def __init__(self, genotype: neat.DefaultGenome, body: Body, config: RevolveNeatConfig):
+    def __init__(
+        self, genotype: neat.DefaultGenome, body: Body, config: RevolveNeatConfig
+    ):
         """
         Initialize this object.
 
