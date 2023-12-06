@@ -262,6 +262,7 @@ def run_multiple(config, n=5):
     plt.xlabel("Generation index")
     plt.ylabel("Fitness")
     plt.title("Mean and max fitness across repetitions with std as shade")
+    plt.show()
 
 
 if __name__ == "__main__":
