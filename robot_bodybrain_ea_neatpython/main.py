@@ -145,6 +145,8 @@ def main(
     if verbose > 0:
         logging.info("Start optimization process.")
     mins, maxs, means = [], [], []
+
+    print("Starting evolution, #Gen: ", config.NUM_GENERATIONS)
     while generation_index < config.NUM_GENERATIONS:
         if verbose > 0:
             logging.info(
@@ -230,8 +232,8 @@ def run_multiple(config, n=5):
     all_means = []
     all_maxs = []
     for i in range(n):
-        fitness, stats = main(config, plot=False)
-        print(pickle.dumps(stats))
+        fitness, stats = main(config, plot=False, save_winner=True)
+        # print(pickle.dumps(stats)) # gives a warning for me ?
         try:
             pickle.dump(stats, f"stats_{i}.pkl")
         except Exception as e:
