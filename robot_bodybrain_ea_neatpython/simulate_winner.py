@@ -11,28 +11,6 @@ from revolve2.modular_robot_simulation import ModularRobotScene, simulate_scenes
 from revolve2.simulators.mujoco_simulator import LocalSimulator
 import pickle
 
-
-def make_body() -> BodyV1:
-    """
-    Create a body for the robot.
-
-    :returns: The created body.
-    """
-    # A modular robot body follows a 'tree' structure.
-    # The 'Body' class automatically creates a center 'core'.
-    # From here, other modular can be attached.
-    # Modules can be attached in a rotated fashion.
-    # This can be any angle, although the original design takes into account only multiples of 90 degrees.
-    body = BodyV1()
-    body.core.left = ActiveHingeV1(RightAngles.DEG_0)
-    body.core.left.attachment = ActiveHingeV1(RightAngles.DEG_0)
-    body.core.left.attachment.attachment = BrickV1(RightAngles.DEG_0)
-    body.core.right = ActiveHingeV1(RightAngles.DEG_0)
-    body.core.right.attachment = ActiveHingeV1(RightAngles.DEG_0)
-    body.core.right.attachment.attachment = BrickV1(RightAngles.DEG_0)
-    return body
-
-
 def main() -> None:
     """Run the simulation."""
     # Set up logging.
