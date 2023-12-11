@@ -1,10 +1,8 @@
 from datetime import datetime
-
 from sklearn import base
 from hyper_parameter_optimization.config.revolve_neat_config import RevolveNeatConfig
 from hyper_parameter_optimization.optimizer.optimizer import (
     OptunaHyperOptimizer,
-    SpotHyperOptimizer,
 )
 from hyper_parameter_optimization.result.optimization_run import OptimizationRun
 from hyper_parameter_optimization.result.optimization_result import OptimizationResult
@@ -23,7 +21,8 @@ pd.set_option("display.max_rows", 500)
 pd.set_option("display.max_columns", 500)
 pd.set_option("display.width", 1000)
 
-N_RUNS = 10
+N_RUNS = int(os.getenv("NRUNS", 10))
+N_GENERATIONS = int(os.getenv('NGEN', 100))
 
 
 def objective(config: RevolveNeatConfig) -> OptimizationRun:
@@ -56,8 +55,13 @@ if __name__ == "__main__":
     logging.info(f"Running with args: {args.spot=}, {args.name=}, {args.timeout=}")
 
     base_config = RevolveNeatConfig(
-        body_num_inputs=5, body_num_outputs=5, brain_num_inputs=7, brain_num_outputs=1
+        body_num_inputs=5, 
+        body_num_outputs=5, 
+        brain_num_inputs=7, 
+        brain_num_outputs=1,
+        NUM_GENERATIONS=N_GENERATIONS
     )
+
     if not bool(args.spot):
         # Optuna tuner
         logging.info("Using Optuna tuner")
@@ -70,6 +74,7 @@ if __name__ == "__main__":
             conn_delete_prob=TunableFloat(0.0, 1),
         )
     else:
+        from hyper_parameter_optimization.optimizer.optimizer import SpotHyperOptimizer
         # Spot
         logging.info("Using Spot tuner")
         tuner = SpotHyperOptimizer(
@@ -82,7 +87,9 @@ if __name__ == "__main__":
         )
 
     result = tuner.run(timeout=args.timeout, n_jobs=-1)
-    result.save(args.name)
+    result.save(
+        os.path.join('./results/', args.name)
+    )
 
     loaded = OptimizationResult.load(args.name)
     print(loaded.summary())

@@ -5,7 +5,7 @@
 
 #SBATCH --nodes=1
 
-#SBATCH --time=0-00:05:00
+#SBATCH --time=0-08:00:00
 
 #SBATCH --partition defq
 
@@ -21,11 +21,20 @@
 ##SBATCH --mail-type=END,FAIL
 
 source $HOME/.bashrc
-conda activate maon
-NRUNS=1 NGEN=10 python hyperopt.py
+conda activate EC
+python hyperopt.py --timeout 4200
 
-mv ./meanmax.png $SLURM_SUBMIT_DIR/result.png
+# Specify the directory you want to copy
+source_directory="./results"
 
+# Specify the destination directory (in this case, the SLURM job's working directory)
+destination_directory="$SLURM_SUBMIT_DIR/results_$SLURM_JOB_ID"
+
+# Create the destination directory if it doesn't exist
+mkdir -p $destination_directory
+
+# Copy the entire directory to the destination
+cp -r $source_directory/* $destination_directory/
 
 # Finish the script
 exit 0

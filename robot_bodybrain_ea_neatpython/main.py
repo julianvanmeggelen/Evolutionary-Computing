@@ -222,6 +222,8 @@ def main(
         sizes_connections=net_size_connections,
         sizes_nodes=net_size_nodes,
         all_fitnesses=all_fitness,
+        winner_individual = max(population, key=lambda individual: individual.fitness),
+        top_5_individual =  sorted(population, key=lambda individual: individual.fitness)[-5:]
     )
     fitness = maxs[-1]
 

@@ -50,8 +50,6 @@ class OptimizationResult:
         df = df.rename_axis('Run', axis=0)
         return df
 
-
-    
     def get_stats(self, key:str) -> list[Any]:
         """
         Return a list of all the statistics with key for all the runs

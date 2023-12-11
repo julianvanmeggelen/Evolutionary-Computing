@@ -19,3 +19,9 @@ simple_ea_xor/__pycache__/config.cpython-310.pyc
 *.db
 *.sqlite
 gymnasium_acrobot/winner-feedforward
+robot_bodybrain_ea_neatpython/Miniforge3-Linux-x86_64.sh
+robot_bodybrain_ea_neatpython/slurm-4677361.out
+robot_bodybrain_ea_neatpython/slurm-4677362.out
+robot_bodybrain_ea_neatpython/slurm-4677376.out
+robot_bodybrain_ea_neatpython/slurm-4677383.out
+robot_bodybrain_ea_neatpython/slurm-4677738.out
