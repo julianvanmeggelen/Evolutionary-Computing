@@ -9,6 +9,7 @@ You learn:
 
 import logging
 import math
+import os
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
@@ -264,6 +265,7 @@ def run_multiple(config, n=5):
     plt.xlabel("Generation index")
     plt.ylabel("Fitness")
     plt.title("Mean and max fitness across repetitions with std as shade")
+    plt.savefig('./meanmax.png')
     plt.show()
 
 
@@ -271,6 +273,8 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
     plt.plot(range(10))
     plt.show()
+    n_generations = int(os.getenv('NGEN', 100))
+
     config = RevolveNeatConfig(
         body_num_inputs=5,
         body_num_outputs=5,
@@ -278,7 +282,8 @@ if __name__ == "__main__":
         brain_num_outputs=1,
         POPULATION_SIZE=100,
         OFFSPRING_SIZE=50,
-        NUM_GENERATIONS=100
+        NUM_GENERATIONS=n_generations
     )  # default config
     #main(config, plot=True)
-    run_multiple(config, 5)
+    n_runs = int(os.getenv('NRUNS', 5))
+    run_multiple(config, n_runs)
