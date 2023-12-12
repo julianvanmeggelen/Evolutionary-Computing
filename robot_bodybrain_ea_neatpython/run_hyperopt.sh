@@ -5,7 +5,9 @@
 
 #SBATCH --nodes=1
 
-#SBATCH --time=0-08:00:00
+#SBATCH --ntasks-per-node=16
+
+#SBATCH --time=0-10:00:00
 
 #SBATCH --partition defq
 
@@ -22,7 +24,7 @@
 
 source $HOME/.bashrc
 conda activate EC
-python hyperopt.py --timeout 4200
+NRUNS=5 NGEN=100 python hyperopt.py --timeout 28800 # 8hours
 
 # Specify the directory you want to copy
 source_directory="./results"

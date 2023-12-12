@@ -5,7 +5,7 @@
 
 #SBATCH --nodes=1
 
-#SBATCH --time=0-00:05:00
+#SBATCH --time=0-5:00:00
 
 #SBATCH --partition defq
 
@@ -21,8 +21,8 @@
 ##SBATCH --mail-type=END,FAIL
 
 source $HOME/.bashrc
-conda activate maon
-NRUNS=1 NGEN=10 python hyperopt.py
+conda activate EC
+NRUNS=20 NGEN=100 python main.py
 
 mv ./meanmax.png $SLURM_SUBMIT_DIR/result.png
 

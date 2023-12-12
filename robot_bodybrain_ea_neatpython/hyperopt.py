@@ -86,10 +86,13 @@ if __name__ == "__main__":
             conn_delete_prob=TunableFloat(0.0, 1),
         )
 
-    result = tuner.run(timeout=args.timeout, n_jobs=-1)
+    result = tuner.run(timeout=args.timeout, n_jobs=1)
+    if not os.path.isdir('./results'):
+        os.mkdir('./results')
+    save_path =  os.path.join('./results/', args.name)
     result.save(
-        os.path.join('./results/', args.name)
+       save_path
     )
 
-    loaded = OptimizationResult.load(args.name)
+    loaded = OptimizationResult.load(save_path)
     print(loaded.summary())

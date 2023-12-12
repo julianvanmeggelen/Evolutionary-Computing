@@ -1,5 +1,6 @@
 """Evaluator class."""
 
+import os
 from revolve2.ci_group import fitness_functions, terrains
 from revolve2.ci_group.simulation import make_standard_batch_parameters
 from revolve2.modular_robot import ModularRobot
@@ -20,7 +21,7 @@ class Evaluator:
     def __init__(
         self,
         headless: bool,
-        num_simulators: int,
+        num_simulators: int = os.getenv("NSIM", None),
     ) -> None:
         """
         Initialize this object.
