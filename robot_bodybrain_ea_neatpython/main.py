@@ -7,6 +7,7 @@ You learn:
 - How to create a simple evolutionary loop.
 """
 
+from datetime import datetime, timedelta
 import logging
 import math
 import os
@@ -234,7 +235,10 @@ def run_multiple(config, n=5):
     all_mins = []
     all_means = []
     all_maxs = []
+    st = datetime.now()
     for i in range(n):
+        if (datetime.now() - st) > timedelta(hours=int(os.getenv('DURATION_HOURS', float('inf')))):
+            break
         fitness, stats = main(config, plot=False, save_winner=True)
         # print(pickle.dumps(stats)) # gives a warning for me ?
         try:
@@ -267,7 +271,9 @@ def run_multiple(config, n=5):
     plt.xlabel("Generation index")
     plt.ylabel("Fitness")
     plt.title("Mean and max fitness across repetitions with std as shade")
-    plt.savefig('./meanmax.png')
+    if not os.path.isdir('./results'):
+        os.mkdir('./results')
+    plt.savefig('./results/meanmax.png')
     plt.show()
 
 
