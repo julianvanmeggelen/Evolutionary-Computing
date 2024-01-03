@@ -237,7 +237,7 @@ def run_multiple(config, n=5):
     all_maxs = []
     st = datetime.now()
     for i in range(n):
-        if (datetime.now() - st) > timedelta(hours=int(os.getenv('DURATION_HOURS', float('inf')))):
+        if (datetime.now() - st) > timedelta(hours=int(os.getenv('DURATION_HOURS', 100000))):
             break
         fitness, stats = main(config, plot=False, save_winner=True)
         # print(pickle.dumps(stats)) # gives a warning for me ?
