@@ -5,7 +5,7 @@
 
 #SBATCH --nodes=1
 
-#SBATCH --time=0-5:00:00
+#SBATCH --time=0-9:00:00
 
 #SBATCH --partition defq
 
@@ -22,10 +22,22 @@
 
 source $HOME/.bashrc
 conda activate EC
-NRUNS=20 NGEN=100 python main.py
+DURATION_HOURS=8 NRUNS=1 NGEN=2 python main.py
 
-mv ./meanmax.png $SLURM_SUBMIT_DIR/result.png
+# Specify the directory you want to copy
+source_directory="./results"
 
+# Specify the destination directory (in this case, the SLURM job's working directory)
+destination_directory="$SLURM_SUBMIT_DIR/results_$SLURM_JOB_ID"
+
+# Create the destination directory if it doesn't exist
+mkdir -p $destination_directory
+
+# Copy the entire directory to the destination
+cp -r $source_directory/* $destination_directory/
+
+# Clear the temp results directory
+rm -r $source_directory/*
 
 # Finish the script
 exit 0

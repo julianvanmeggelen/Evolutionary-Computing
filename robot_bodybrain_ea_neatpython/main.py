@@ -236,19 +236,27 @@ def run_multiple(config, n=5):
     all_means = []
     all_maxs = []
     st = datetime.now()
+    if not os.path.isdir('./results'): os.mkdir('./results')
     for i in range(n):
-        if (datetime.now() - st) > timedelta(hours=int(os.getenv('DURATION_HOURS', float('inf')))):
+        if (datetime.now() - st) > timedelta(hours=int(os.getenv('DURATION_HOURS', 100000))):
             break
         fitness, stats = main(config, plot=False, save_winner=True)
         # print(pickle.dumps(stats)) # gives a warning for me ?
         try:
-            pickle.dump(stats, f"stats_{i}.pkl")
+            with open(f'./results/stats_{i}', 'wb') as f:
+                pickle.dump(stats, f)
         except Exception as e:
+            raise e
             print(e)
 
         all_mins.append(stats['mins'])
         all_maxs.append(stats['maxs'])
         all_means.append(stats['means'])
+
+
+    np.save('./results/all_means.np', all_means)
+    np.save('./results/all_maxs.np', all_maxs)
+    np.save('./results/all_mins.np', all_mins)
         
     print("plotting")
     plt.figure()
@@ -290,7 +298,8 @@ if __name__ == "__main__":
         brain_num_outputs=1,
         POPULATION_SIZE=100,
         OFFSPRING_SIZE=50,
-        NUM_GENERATIONS=n_generations
+        NUM_GENERATIONS=n_generations,
+        NUM_SIMULATORS=16
     )  # default config
     #main(config, plot=True)
     n_runs = int(os.getenv('NRUNS', 5))

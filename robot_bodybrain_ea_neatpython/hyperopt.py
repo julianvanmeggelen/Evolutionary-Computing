@@ -3,10 +3,11 @@ from sklearn import base
 from hyper_parameter_optimization.config.revolve_neat_config import RevolveNeatConfig
 from hyper_parameter_optimization.optimizer.optimizer import (
     OptunaHyperOptimizer,
+    SpotHyperOptimizer
 )
 from hyper_parameter_optimization.result.optimization_run import OptimizationRun
 from hyper_parameter_optimization.result.optimization_result import OptimizationResult
-from hyper_parameter_optimization.optimizer.tunable_param import TunableFloat
+from hyper_parameter_optimization.optimizer.tunable_param import TunableFloat, TunableCategory
 import main
 import os
 import sys
@@ -42,6 +43,7 @@ def objective(config: RevolveNeatConfig) -> OptimizationRun:
 
 
 if __name__ == "__main__":
+    
     parser = argparse.ArgumentParser()
     parser.add_argument("--spot", default=0, type=int)  # wether to use spot
     parser.add_argument(
@@ -53,6 +55,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     logging.info(f"Running with args: {args.spot=}, {args.name=}, {args.timeout=}")
+    logging.info(f"Using fitness function {os.getenv('FIT_FUN')}")
 
     base_config = RevolveNeatConfig(
         body_num_inputs=5, 
@@ -62,29 +65,21 @@ if __name__ == "__main__":
         NUM_GENERATIONS=N_GENERATIONS
     )
 
-    if not bool(args.spot):
-        # Optuna tuner
-        logging.info("Using Optuna tuner")
-        tuner = OptunaHyperOptimizer(
+
+    tuner_type = OptunaHyperOptimizer if not bool(args.spot) else SpotHyperOptimizer
+    tuner = tuner_type(
             objective=objective,
             config_template=base_config,
-            bias_mutate_power=TunableFloat(0.1, 2),
-            bias_replace_rate=TunableFloat(0.0, 1),
-            conn_add_prob=TunableFloat(0.0, 1),
-            conn_delete_prob=TunableFloat(0.0, 1),
+            node_delete_prob = TunableFloat(0.0, 0.2),
+            node_add_prob = TunableFloat(0.0, 0.2),
+            conn_add_prob=TunableFloat(0.0, 0.2),
+            conn_delete_prob=TunableFloat(0.0, 0.2),
+            bias_mutate_rate=TunableFloat(0.0, 0.2, init=0),
+            weight_mutate_rate=TunableFloat(0.0, 1.0, init=0.9),
+            activation_default=TunableCategory(["tanh","gauss","sin","identity"], init='tanh'),
+            activation_mutate_rate=TunableFloat(0.0,1.0)
         )
-    else:
-        from hyper_parameter_optimization.optimizer.optimizer import SpotHyperOptimizer
-        # Spot
-        logging.info("Using Spot tuner")
-        tuner = SpotHyperOptimizer(
-            objective=objective,
-            config_template=base_config,
-            bias_mutate_power=TunableFloat(0.1, 2),
-            bias_replace_rate=TunableFloat(0.0, 1),
-            conn_add_prob=TunableFloat(0.0, 1),
-            conn_delete_prob=TunableFloat(0.0, 1),
-        )
+    logging.info(f'Using tuner type {tuner_type.__name__}')
 
     result = tuner.run(timeout=args.timeout, n_jobs=1)
     if not os.path.isdir('./results'):

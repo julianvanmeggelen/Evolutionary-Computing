@@ -5,9 +5,6 @@ from typing import Any
 from revolve2.ci_group.genotypes.cppnwin.modular_robot.v1._body_develop import (
     __Module,
     __add,
-    __timesscalar,
-    __cross,
-    __dot,
     __rotate,
 )
 import neat

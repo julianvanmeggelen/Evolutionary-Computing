@@ -38,5 +38,8 @@ mkdir -p $destination_directory
 # Copy the entire directory to the destination
 cp -r $source_directory/* $destination_directory/
 
+# Clear the temp results directory
+rm -r $source_directory/*
+
 # Finish the script
 exit 0
