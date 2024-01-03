@@ -56,7 +56,7 @@ def main() -> None:
 
     # TODO: Load the winner
     print("Loading winner is hardcoded in simulate_winner.py, you need to modify it to load the winner.")
-    return
+    #return
 
     # Load the winner
     with open("winner-feedforward7", "rb") as f:
@@ -94,9 +94,9 @@ def main() -> None:
 
     # `batch_parameters` are important parameters for simulation.
     # Here, we use the parameters that are standard in CI Group.
-    batch_parameters = make_standard_batch_parameters()
+    batch_parameters = make_standard_batch_parameters(simulation_time=100)
 
-    # Simulate the scene.
+    # Simulate the scene.a
     # A simulator can run multiple sets of scenes sequentially; it can be reused.
     # However, in this tutorial we only use it once.
     simulate_scenes(

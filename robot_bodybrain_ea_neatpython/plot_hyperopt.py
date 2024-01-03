@@ -76,6 +76,7 @@ if __name__ == "__main__":
     #Load result
     optimization_result = OptimizationResult.load(args.name)
     best_run = optimization_result.best_run()
+    print(len(best_run.statistics))
 
     #Plot the utility over the runs
     optimization_result.plot_utility(use_timestamp=False)
@@ -110,6 +111,8 @@ if __name__ == "__main__":
     #Print the summary
     print('Summary table')
     print(optimization_result.summary())
+
+    print(optimization_result.summary().to_latex())
 
     #Print the importance
     print('Parameter importance')

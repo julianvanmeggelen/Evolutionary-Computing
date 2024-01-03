@@ -1,6 +1,7 @@
 """Evaluator class."""
 
 import os
+from typing import Callable
 from revolve2.ci_group import fitness_functions, terrains
 from revolve2.ci_group.simulation import make_standard_batch_parameters
 from revolve2.modular_robot import ModularRobot
@@ -11,6 +12,27 @@ from revolve2.modular_robot_simulation import (
 )
 from revolve2.simulators.mujoco_simulator import LocalSimulator
 
+from revolve2.modular_robot_simulation import ModularRobotSimulationState
+
+from hyper_parameter_optimization.fitness_functions import rotation, targeted_locomotion
+class FitnessFunctions:
+    XY_DISPLACEMENT = 'XY_DISPLACEMENT'
+    ROTATION = 'ROTATION'
+    TARGETED_LOCOMOTION = 'TARGETED_LOCOMOTION'
+    DEFAULT = 'XY_DISPLACEMENT'
+
+def load_fitness_function() -> Callable[[ModularRobotSimulationState,ModularRobotSimulationState], float]:
+    """ Load fitness function from environment or load default (XY_DISPLACEMENT)
+    """
+    env_var = os.getenv("FITNESS_FUN", FitnessFunctions.DEFAULT).upper()
+    if env_var == FitnessFunctions.XY_DISPLACEMENT:
+        return  fitness_functions.xy_displacement
+    if env_var == FitnessFunctions.ROTATION:
+        return rotation
+    if env_var == FitnessFunctions.TARGETED_LOCOMOTION:
+        return targeted_locomotion
+    
+    raise NotImplementedError(f'Fitness function {env_var} not recognized as a fitness function')
 
 class Evaluator:
     """Provides evaluation of robots."""
@@ -60,9 +82,11 @@ class Evaluator:
             scenes=scenes,
         )
 
-        # Calculate the xy displacements.
+        # Calculate the fitness.
+        fit_fun = load_fitness_function()
+
         xy_displacements = [
-            fitness_functions.xy_displacement(
+            fit_fun(
                 states[0].get_modular_robot_simulation_state(robot),
                 states[-1].get_modular_robot_simulation_state(robot),
             )

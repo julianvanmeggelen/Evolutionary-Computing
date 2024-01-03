@@ -54,5 +54,5 @@ if __name__ == "__main__":
                 )
             )
 
-    all_best = sorted([stats['winner_individual'] for stats in all_stats], key=lambda el: el.fitness)[-5:]
+    all_best = sorted([stats['winner_individual'] for stats in all_stats], key=lambda el: el.fitness)[-10:]
     simulate(all_best)
