@@ -24,7 +24,7 @@
 
 source $HOME/.bashrc
 conda activate EC
-NRUNS=10 NGEN=100 python hyperopt.py --timeout 345600 # 3 days #28800 # 8hours
+NRUNS=10 NGEN=100 python hyperopt.py --baseline 1 --timeout 345600 # 3 days #28800 # 8hours
 
 # Specify the directory you want to copy
 source_directory="./results"
