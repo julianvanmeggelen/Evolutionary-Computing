@@ -2,6 +2,7 @@ from datetime import datetime
 from sklearn import base
 from hyper_parameter_optimization.config.revolve_neat_config import RevolveNeatConfig
 from hyper_parameter_optimization.optimizer.optimizer import (
+    BaselineDummyTuner,
     OptunaHyperOptimizer,
     SpotHyperOptimizer
 )
@@ -16,7 +17,7 @@ import argparse
 from revolve2.experimentation.logging import setup_logging
 import logging
 
-setup_logging()
+setup_logging(level=logging.DEBUG)
 
 pd.set_option("display.max_rows", 500)
 pd.set_option("display.max_columns", 500)
@@ -46,6 +47,8 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser()
     parser.add_argument("--spot", default=0, type=int)  # wether to use spot
+    parser.add_argument("--baseline", default=0, type=int)  # wether to run the baseline
+
     parser.add_argument(
         "--name",
         default=f"tuneresult_{datetime.now().strftime('%Y-%m-%d-%H:%M')}",
@@ -55,7 +58,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     logging.info(f"Running with args: {args.spot=}, {args.name=}, {args.timeout=}")
+    print(f"Running with args: {args.spot=}, {args.name=}, {args.timeout=}")
     logging.info(f"Using fitness function {os.getenv('FIT_FUN')}")
+    print(f"Using fitness function {os.getenv('FIT_FUN')}")
 
     base_config = RevolveNeatConfig(
         body_num_inputs=5, 
@@ -65,26 +70,40 @@ if __name__ == "__main__":
         NUM_GENERATIONS=N_GENERATIONS
     )
 
+    save_path =  os.path.join('./results/', args.name)
 
-    tuner_type = OptunaHyperOptimizer if not bool(args.spot) else SpotHyperOptimizer
-    tuner = tuner_type(
+
+    if not bool(args.baseline):
+        tuner_type = OptunaHyperOptimizer if not bool(args.spot) else SpotHyperOptimizer
+        tuner = tuner_type(
+                objective=objective,
+                checkpoint_dir=save_path,
+                config_template=base_config,
+                fitness_function= os.getenv("FITNESS_FUN"),
+                node_delete_prob = TunableFloat(0.0, 0.2),
+                node_add_prob = TunableFloat(0.0, 0.2),
+                conn_add_prob=TunableFloat(0.0, 0.2),
+                conn_delete_prob=TunableFloat(0.0, 0.2),
+                bias_mutate_rate=TunableFloat(0.0, 0.2, init=0),
+                weight_mutate_rate=TunableFloat(0.0, 1.0, init=0.9),
+                activation_default=TunableCategory(["tanh","gauss","sin","identity"], init='tanh'),
+                activation_mutate_rate=TunableFloat(0.0,1.0)
+            )
+    else:
+        tuner_type = BaselineDummyTuner
+        tuner = BaselineDummyTuner(
             objective=objective,
+            checkpoint_dir = save_path,
             config_template=base_config,
-            node_delete_prob = TunableFloat(0.0, 0.2),
-            node_add_prob = TunableFloat(0.0, 0.2),
-            conn_add_prob=TunableFloat(0.0, 0.2),
-            conn_delete_prob=TunableFloat(0.0, 0.2),
-            bias_mutate_rate=TunableFloat(0.0, 0.2, init=0),
-            weight_mutate_rate=TunableFloat(0.0, 1.0, init=0.9),
-            activation_default=TunableCategory(["tanh","gauss","sin","identity"], init='tanh'),
-            activation_mutate_rate=TunableFloat(0.0,1.0)
+            fitness_function= os.getenv("FITNESS_FUN")
         )
+
     logging.info(f'Using tuner type {tuner_type.__name__}')
+    print(f'Using tuner type {tuner_type.__name__}')
 
     result = tuner.run(timeout=args.timeout, n_jobs=1)
     if not os.path.isdir('./results'):
         os.mkdir('./results')
-    save_path =  os.path.join('./results/', args.name)
     result.save(
        save_path
     )
