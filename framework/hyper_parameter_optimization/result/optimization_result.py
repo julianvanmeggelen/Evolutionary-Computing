@@ -13,17 +13,18 @@ class OptimizationResult:
     Stores all the results of an optimization result
     """
 
-    def __init__(self, tune_params: dict[str, TunableParameter], runs: list[OptimizationRun] = []):
+    def __init__(self, tune_params: dict[str, TunableParameter], fitness_function:str, runs: list[OptimizationRun] = []):
         self.tune_params = tune_params
         self.runs: list[OptimizationRun] = []        
         self._tuner = None #the original tuner object used for tuning
         self.importance: dict[str,float] = None
+        self.fitness_function = fitness_function
 
     @staticmethod
     def load(file_name):
         with open(file_name, "rb") as file:
-            tune_params, runs, _tuner, importance = pickle.load(file)
-        ret = OptimizationResult(tune_params = tune_params)
+            tune_params, runs, _tuner, importance, fitness_function = pickle.load(file)
+        ret = OptimizationResult(tune_params = tune_params, fitness_function=fitness_function)
         ret._tuner = _tuner
         ret.runs = runs
         ret.importance = importance
@@ -75,4 +76,4 @@ class OptimizationResult:
 
     def save(self, file_name: str):
         with open(file_name, "wb") as file:
-            pickle.dump((self.tune_params, self.runs, self._tuner, self.importance), file)  # we only care about storing the runs
+            pickle.dump((self.tune_params, self.runs, self._tuner, self.importance, self.fitness_function), file) 
