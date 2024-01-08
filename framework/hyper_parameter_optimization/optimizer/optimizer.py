@@ -40,7 +40,7 @@ class HyperOptimizer:
     Base class for several optimization framework backends
     """
 
-    def __init__(self, objective: OptimizationObjective, config_template: RevolveNeatConfig = None, **tune_params: dict[str,TunableParameter]):
+    def __init__(self, objective: OptimizationObjective, fitness_function:str, config_template: RevolveNeatConfig = None, checkpoint_dir: str = None, **tune_params: dict[str,TunableParameter]):
         """
         args:
             objective: A Callable that accepts a RevolveNeatConfig object and returns an OptimizationRun
@@ -50,7 +50,8 @@ class HyperOptimizer:
         self.objective: OptimizationObjective = objective
         self.tune_params = tune_params
         self._config_template = config_template or RevolveNeatConfig()
-        self.result: OptimizationResult = OptimizationResult(tune_params = tune_params) 
+        self.result: OptimizationResult = OptimizationResult(tune_params = tune_params, fitness_function = fitness_function) 
+        self.checkpoint_dir = checkpoint_dir
       
     def _base_config(self):
         """
@@ -81,7 +82,12 @@ class HyperOptimizer:
         """
         config = self._generate_config(*args, **kwargs)
         utility = self._eval_config(config)
+        self._checkpoint()
         return utility
+
+    def _checkpoint(self):
+        if self.checkpoint_dir:
+            self.result.save(self.checkpoint_dir)
 
     def run(self, *args, **kwargs) -> OptimizationResult:
         """
@@ -108,6 +114,23 @@ class HyperOptimizer:
         total_time_minutes = self.total_time.total_seconds()/60
         print(f"\t \t per minute: {n_runs/total_time_minutes}")
         print("="*30)
+
+
+class BaselineDummyTuner(HyperOptimizer):
+    """Do not tune but run the baseline. Only gives one trial.
+    """
+
+    def __init__(self, objective: OptimizationObjective, config_template: RevolveNeatConfig, fitness_function:str, checkpoint_dir: str = None):
+        super().__init__(objective=objective, config_template=config_template, checkpoint_dir=checkpoint_dir, fitness_function=fitness_function)
+
+    def _generate_config(self, *args, **kwargs) -> RevolveNeatConfig:
+        return self._base_config()
+    
+    def run(self, timeout, n_jobs) -> OptimizationResult:
+        self._pre_run()
+        utility = self._internal_objective()
+        self._post_run()
+        return self.result
 
 class OptunaHyperOptimizer(HyperOptimizer):
     def _generate_config(self, trial) -> RevolveNeatConfig:
