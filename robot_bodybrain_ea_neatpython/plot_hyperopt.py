@@ -118,7 +118,11 @@ if __name__ == "__main__":
     print('Parameter importance')
     print(pd.DataFrame([optimization_result.importance]))
 
-    simulate([stats['winner_individual'] for stats in best_run.statistics])
+
+    best_run_sorted = sorted(best_run.statistics, key = lambda el: el['winner_individual'].fitness, reverse=True)
+
+    print('Best run: ', '\n - '.join([str(_['winner_individual'].fitness) for _ in best_run_sorted]))
+    simulate([stats['winner_individual'] for stats in best_run_sorted[0:1]])
 
     # sns.relplot(x="horsepower", y="mpg", hue="origin", size="weight",
     #         sizes=(40, 400), alpha=.5, palette="muted",
