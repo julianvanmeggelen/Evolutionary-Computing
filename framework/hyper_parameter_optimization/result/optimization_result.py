@@ -23,7 +23,12 @@ class OptimizationResult:
     @staticmethod
     def load(file_name):
         with open(file_name, "rb") as file:
-            tune_params, runs, _tuner, importance, fitness_function = pickle.load(file)
+            loaded = pickle.load(file)
+            if len(loaded) == 5:
+                tune_params, runs, _tuner, importance, fitness_function = loaded
+            else:
+                tune_params, runs, _tuner, importance = loaded
+                fitness_function= None
         ret = OptimizationResult(tune_params = tune_params, fitness_function=fitness_function)
         ret._tuner = _tuner
         ret.runs = runs

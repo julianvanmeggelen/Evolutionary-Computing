@@ -212,7 +212,7 @@ class SpotHyperOptimizer(HyperOptimizer):
                 y = np.append(y, -utility)
             return y
     
-    def run(self, n_trials=15, timeout=600, n_jobs=-1) -> OptimizationResult:
+    def run(self, n_trials=95, timeout=600, n_jobs=-1) -> OptimizationResult:
         self._pre_run()
 
         fun_control = {}
