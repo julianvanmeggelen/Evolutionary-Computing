@@ -1,4 +1,5 @@
 import argparse
+import math
 
 from matplotlib import pyplot as plt
 import pandas as pd
@@ -60,11 +61,15 @@ def simulate(individuals):
     # Simulate the scene.
     # A simulator can run multiple sets of scenes sequentially; it can be reused.
     # However, in this tutorial we only use it once.
-    simulate_scenes(
-        simulator=simulator,
-        batch_parameters=batch_parameters,
-        scenes=scene,
-    )
+
+    try:
+        simulate_scenes(
+            simulator=simulator,
+            batch_parameters=batch_parameters,
+            scenes=scene,
+        )
+    except Exception as e:
+        print(f"Not simulating: {e}")
 
 
 if __name__ == "__main__":
@@ -95,18 +100,19 @@ if __name__ == "__main__":
 
     #plot scatterplot for each parameter vs utility
     n_params = len(optimization_result.tune_params)
-    ncols = 4
-    nrows = int(n_params/ncols)
-    fig, axs = plt.subplots(nrows, ncols)
-    fig.suptitle('Parameter value vs. utility relation')
-    for param, ax in zip(optimization_result.tune_params.keys() ,axs.flatten()):
-        param_vals = [getattr(run.config, param) for run in optimization_result.runs]
-        utility_vals = [run.utility for run in optimization_result.runs]
-        sns.scatterplot(x=param_vals, y=utility_vals, ax=ax)#, lowess=True)
-        ax.set_xlabel(param)
-        ax.set_ylabel('Utility')
+    ncols = 3
+    nrows = math.ceil(n_params/ncols)
+    if nrows>0:
+        fig, axs = plt.subplots(nrows, ncols, figsize=(20,20))
+        fig.suptitle('Parameter value vs. utility relation')
+        for param, ax in zip(optimization_result.tune_params.keys() ,axs.flatten()):
+            param_vals = [getattr(run.config, param) for run in optimization_result.runs]
+            utility_vals = [run.utility for run in optimization_result.runs]
+            sns.scatterplot(x=param_vals, y=utility_vals, ax=ax)#, lowess=True)
+            ax.set_xlabel(param)
+            ax.set_ylabel('Utility')
 
-    plt.savefig(plot_save_path + '/' + 'correlations' +'.png')
+        plt.savefig(plot_save_path + '/' + 'correlations' +'.png')
 
     #Print the summary
     print('Summary table')
