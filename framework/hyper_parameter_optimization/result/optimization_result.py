@@ -1,5 +1,6 @@
+from __future__ import annotations
 import pickle
-from typing import Any
+from typing import Any, Iterable
 from hyper_parameter_optimization.result.optimization_run import OptimizationRun
 from hyper_parameter_optimization.optimizer.tunable_param import (
     TunableParameter
@@ -34,6 +35,18 @@ class OptimizationResult:
         ret.runs = runs
         ret.importance = importance
         return ret
+
+    @staticmethod
+    def merge(to_merge: list[OptimizationResult]) -> OptimizationResult:
+        """Merge multiple OptimizationResult objects into one. e.g for reducing multiple results to one in a distributed setting
+        """
+        fitness_functions = [_.fitness_function for _ in to_merge]
+        if not all(_ == fitness_functions[0] for _ in fitness_functions):
+            raise ValueError(f"Not all results have same fitness function")
+        merged = to_merge[0]
+        for result in to_merge[1:]:
+            merged.runs += result.runs
+        return merged
 
     def add(self, run: OptimizationRun):
         self.runs.append(run)
@@ -82,3 +95,4 @@ class OptimizationResult:
     def save(self, file_name: str):
         with open(file_name, "wb") as file:
             pickle.dump((self.tune_params, self.runs, self._tuner, self.importance, self.fitness_function), file) 
+

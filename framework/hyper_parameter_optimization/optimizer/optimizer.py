@@ -30,7 +30,7 @@ from spotPython.hyperparameters.values import (
 )
 from hyper_parameter_optimization.optimizer.spot_specific import DummyModel, SpotHyperDict
 import json
-from typing import Dict
+from typing import Dict, TypeVar
 from hyper_parameter_optimization.optimizer.tunable_param import TunableParameter, TunableFloat, TunableCategory, TunableDataType
 
 
@@ -116,6 +116,13 @@ class HyperOptimizer:
         print("="*30)
 
 
+
+class DistributableHyperOptimizer(HyperOptimizer):
+    """ A hyperoptimizer that can be used in distributed manner
+    """
+    def run_parallel(self, *args, **kwargs) -> OptimizationResult: 
+        raise NotImplementedError
+
 class BaselineDummyTuner(HyperOptimizer):
     """Do not tune but run the baseline. Only gives one trial.
     """
@@ -132,7 +139,7 @@ class BaselineDummyTuner(HyperOptimizer):
         self._post_run()
         return self.result
 
-class OptunaHyperOptimizer(HyperOptimizer):
+class OptunaHyperOptimizer(DistributableHyperOptimizer):
     def _generate_config(self, trial) -> RevolveNeatConfig:
 
         # start with the base
@@ -176,6 +183,19 @@ class OptunaHyperOptimizer(HyperOptimizer):
         self.result.importance = optuna.importance.get_param_importances(study)
         self._post_run()
         return self.result
+
+    def run_parallel(self, study: optuna.Study, n_trials=None, timeout=600, n_jobs=-1) -> OptimizationResult:
+        self._pre_run()
+        self.result._tuner = study
+
+        study.optimize(
+            self._internal_objective, n_jobs=n_jobs, timeout=timeout, n_trials=n_trials
+        )
+
+        self.result.importance = optuna.importance.get_param_importances(study)
+        self._post_run()
+        return self.result
+
 
 
 class SpotHyperOptimizer(HyperOptimizer):
