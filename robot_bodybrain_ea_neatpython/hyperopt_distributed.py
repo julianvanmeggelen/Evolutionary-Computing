@@ -6,17 +6,22 @@ Works for Optuna, Spot ???
 
 
 from datetime import datetime
-from hyper_parameter_optimization.optimizer.distributed import DistributedOptunaSlurmHyperOptimizer
+from hyper_parameter_optimization.optimizer.distributed import (
+    DistributedOptunaSlurmHyperOptimizer,
+)
 from sklearn import base
 from hyper_parameter_optimization.config.revolve_neat_config import RevolveNeatConfig
 from hyper_parameter_optimization.optimizer.optimizer import (
     BaselineDummyTuner,
     OptunaHyperOptimizer,
-    SpotHyperOptimizer
+    SpotHyperOptimizer,
 )
 from hyper_parameter_optimization.result.optimization_run import OptimizationRun
 from hyper_parameter_optimization.result.optimization_result import OptimizationResult
-from hyper_parameter_optimization.optimizer.tunable_param import TunableFloat, TunableCategory
+from hyper_parameter_optimization.optimizer.tunable_param import (
+    TunableFloat,
+    TunableCategory,
+)
 import main
 import os
 import sys
@@ -32,7 +37,7 @@ pd.set_option("display.max_columns", 500)
 pd.set_option("display.width", 1000)
 
 N_RUNS = int(os.getenv("NRUNS", 10))
-N_GENERATIONS = int(os.getenv('NGEN', 100))
+N_GENERATIONS = int(os.getenv("NGEN", 100))
 
 
 def objective(config: RevolveNeatConfig) -> OptimizationRun:
@@ -52,7 +57,6 @@ def objective(config: RevolveNeatConfig) -> OptimizationRun:
 
 
 if __name__ == "__main__":
-    
     parser = argparse.ArgumentParser()
     parser.add_argument("--spot", default=0, type=int)  # wether to use spot
     parser.add_argument("--baseline", default=0, type=int)  # wether to run the baseline
@@ -71,41 +75,62 @@ if __name__ == "__main__":
     print(f"Using fitness function {os.getenv('FIT_FUN')}")
 
     base_config = RevolveNeatConfig(
-        body_num_inputs=5, 
-        body_num_outputs=5, 
-        brain_num_inputs=7, 
+        body_num_inputs=5,
+        body_num_outputs=5,
+        brain_num_inputs=7,
         brain_num_outputs=1,
-        NUM_GENERATIONS=N_GENERATIONS
+        NUM_GENERATIONS=N_GENERATIONS,
+        structural_mutation_surer="true",
     )
 
-    save_path =  os.path.join('./results/', args.name)
+    save_path = os.path.join("./results/", args.name)
+    n_workers = int(os.getenv("WORKERS", 10))
+    n_trials = int(os.getenv("TRIALS", 10))
+    n_trials_per_worker = n_trials/n_workers
 
     tuner = DistributedOptunaSlurmHyperOptimizer(
-            n_workers = int(os.getenv("WORKERS", 10)), 
-            cores = 16, 
-            db = 'sqlite:///optuna_distributed.sqlite',
-            objective=objective,
-            checkpoint_dir=save_path,
-            config_template=base_config,
-            fitness_function= os.getenv("FITNESS_FUN"),
-            node_delete_prob = TunableFloat(0.0, 0.2),
-            node_add_prob = TunableFloat(0.0, 0.2),
-            conn_add_prob=TunableFloat(0.0, 0.2),
-            conn_delete_prob=TunableFloat(0.0, 0.2),
-            bias_mutate_rate=TunableFloat(0.0, 0.2, init=0),
-            weight_mutate_rate=TunableFloat(0.0, 1.0, init=0.9),
-            activation_default=TunableCategory(["tanh","gauss","sin","identity"], init='tanh'),
-            activation_mutate_rate=TunableFloat(0.0,1.0)
-        )
-  
-    logging.info(f'Using tuner type {type(tuner).__name__}')
-
-    result = tuner.run(timeout=args.timeout, n_jobs=1)
-    if not os.path.isdir('./results'):
-        os.mkdir('./results')
-    result.save(
-       save_path
+        n_workers=int(os.getenv("WORKERS", 10)),
+        cores=16,
+        db="sqlite:///optuna_distributed.sqlite",
+        objective=objective,
+        checkpoint_dir=save_path,
+        config_template=base_config,
+        fitness_function=os.getenv("FITNESS_FUN"),
+        node_delete_prob=TunableFloat(0.0, 1.0),
+        node_add_prob=TunableFloat(0.0, 1.0),
+        conn_add_prob=TunableFloat(0.0, 1.0),
+        conn_delete_prob=TunableFloat(0.0, 1.0),
+        bias_mutate_rate=TunableFloat(0.0, 1.0),
+        weight_mutate_rate=TunableFloat(0.0, 1.0),
+        activation_default=TunableCategory(
+            [
+                'sigmoid',
+                'tanh', 
+                'sin', 
+                'gauss', 
+                'relu', 
+                'softplus',
+                'identity',
+                'clamped',
+                'inv', 
+                'log', 
+                'exp', 
+                'abs', 
+                'hat', 
+                'square', 
+                'cube', 
+            ],
+            init="tanh",
+        ),
+        activation_mutate_rate=TunableFloat(0.0, 1.0),
     )
+
+    logging.info(f"Using tuner type {type(tuner).__name__}")
+
+    result = tuner.run(timeout=args.timeout, n_jobs=1, n_trials=n_trials_per_worker)
+    if not os.path.isdir("./results"):
+        os.mkdir("./results")
+    result.save(save_path)
 
     loaded = OptimizationResult.load(save_path)
     print(loaded.summary())
