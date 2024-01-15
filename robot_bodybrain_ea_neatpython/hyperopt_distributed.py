@@ -85,11 +85,11 @@ if __name__ == "__main__":
 
     save_path = os.path.join("./results/", args.name)
     n_workers = int(os.getenv("WORKERS", 10))
-    n_trials = int(os.getenv("TRIALS", 10))
+    n_trials = int(os.getenv("TRIALS", 100))
     n_trials_per_worker = n_trials/n_workers
 
     tuner = DistributedOptunaSlurmHyperOptimizer(
-        n_workers=int(os.getenv("WORKERS", 10)),
+        n_workers=n_workers,
         cores=16,
         db="sqlite:///optuna_distributed.sqlite",
         objective=objective,

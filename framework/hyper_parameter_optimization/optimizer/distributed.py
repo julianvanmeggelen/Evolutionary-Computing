@@ -33,7 +33,8 @@ class DistributedOptunaSlurmHyperOptimizer():
             memory =self.memory,
             processes = 1,
             nanny=False,
-            job_extra_directives = ['--time=0-105:00:00']
+            walltime='105:00:00',
+            #job_extra_directives = ['--time=0-105:00:00']
         )
 
         # Scale the cluster to the desired number of workers
