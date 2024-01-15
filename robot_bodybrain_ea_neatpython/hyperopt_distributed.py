@@ -96,12 +96,12 @@ if __name__ == "__main__":
         checkpoint_dir=save_path,
         config_template=base_config,
         fitness_function=os.getenv("FITNESS_FUN"),
-        node_delete_prob=TunableFloat(0.0, 1.0),
-        node_add_prob=TunableFloat(0.0, 1.0),
-        conn_add_prob=TunableFloat(0.0, 1.0),
-        conn_delete_prob=TunableFloat(0.0, 1.0),
-        bias_mutate_rate=TunableFloat(0.0, 1.0),
-        weight_mutate_rate=TunableFloat(0.0, 1.0),
+        node_delete_prob=TunableFloat(0.0, 1.0, init=0.0),
+        node_add_prob=TunableFloat(0.0, 1.0, init=0.01),
+        conn_add_prob=TunableFloat(0.0, 1.0, init=0.08),
+        conn_delete_prob=TunableFloat(0.0, 1.0, init=0.02),
+        bias_mutate_rate=TunableFloat(0.0, 1.0, init=0.0),
+        weight_mutate_rate=TunableFloat(0.0, 1.0, init=0.9),
         activation_default=TunableCategory(
             [
                 'sigmoid',
@@ -122,7 +122,7 @@ if __name__ == "__main__":
             ],
             init="tanh",
         ),
-        activation_mutate_rate=TunableFloat(0.0, 1.0),
+        activation_mutate_rate=TunableFloat(0.0, 1.0, init=0.03),
     )
 
     logging.info(f"Using tuner type {type(tuner).__name__}")
