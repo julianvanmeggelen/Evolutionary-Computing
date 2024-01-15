@@ -7,6 +7,7 @@ from spotPython.spot import spot
 from scipy.optimize import differential_evolution
 from functools import partial
 import logging
+from math import inf
 from hyper_parameter_optimization.config.revolve_neat_config import (
     RevolveNeatConfig
 )
@@ -232,7 +233,7 @@ class SpotHyperOptimizer(HyperOptimizer):
                 y = np.append(y, -utility)
             return y
     
-    def run(self, n_trials=95, timeout=600, n_jobs=-1) -> OptimizationResult:
+    def run(self, n_trials=100, timeout=600, n_jobs=-1) -> OptimizationResult:
         self._pre_run()
 
         fun_control = {}
@@ -255,7 +256,8 @@ class SpotHyperOptimizer(HyperOptimizer):
             lower=lower,  # lower bound of the search space
             upper=upper,  # upper bound of the search space
             fun_evals=n_trials,  # default value
-            max_time=timeout/60,  # timeout in mins
+            # max_time=timeout/60,  # timeout in mins
+            max_time= inf,
             var_name=var_name,
             var_type=var_type,
             show_progress=True,
