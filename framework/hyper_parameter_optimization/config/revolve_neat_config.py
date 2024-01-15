@@ -23,10 +23,10 @@ class RevolveNeatConfig(NeatGenomeConfigGenericMixin):
     aggregation_options: str = "sum"
     bias_init_mean: float = 0.0
     bias_init_stdev: float = 1.0
-    bias_max_value: float = 10.0
-    bias_min_value: float = -10.0
+    bias_max_value: float = 10.0 # NOTE: it was 0 for multiNEAT
+    bias_min_value: float = -10.0 # NOTE: it was 0 for multiNEAT
     bias_mutate_power: float = 0.5
-    bias_mutate_rate: float = 0.7
+    bias_mutate_rate: float = 0.0
     bias_replace_rate: float = 0.1
     compatibility_disjoint_coefficient = 1.0
     compatibility_weight_coefficient = 0.5
@@ -54,7 +54,7 @@ class RevolveNeatConfig(NeatGenomeConfigGenericMixin):
     weight_min_value: float = -8
     weight_mutate_power: float = 0.2
     weight_mutate_rate: float = 0.9
-    weight_replace_rate: float = 0.0
+    weight_replace_rate: float = 0.0 # NOTE: it was 0.25 for multiNEAT
     single_structural_mutation = False
     enabled_rate_to_false_add: float = 0.0
     enabled_rate_to_true_add: float = 0.0
