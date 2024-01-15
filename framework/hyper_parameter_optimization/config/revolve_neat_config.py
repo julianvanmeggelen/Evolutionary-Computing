@@ -17,7 +17,7 @@ class RevolveNeatConfig(NeatGenomeConfigGenericMixin):
     #Neat config 
     activation_default: str = "tanh"
     activation_mutate_rate: float = 0.03
-    activation_options: str = ("tanh","gauss","sin","identity")
+    activation_options: tuple = ('sigmoid', 'tanh', 'sin', 'gauss', 'relu', 'softplus', 'identity', 'clamped', 'inv', 'log', 'exp', 'abs', 'hat', 'square', 'cube')
     aggregation_default: str = "sum"
     aggregation_mutate_rate: float = 0.0
     aggregation_options: str = "sum"
@@ -58,7 +58,7 @@ class RevolveNeatConfig(NeatGenomeConfigGenericMixin):
     single_structural_mutation = False
     enabled_rate_to_false_add: float = 0.0
     enabled_rate_to_true_add: float = 0.0
-    structural_mutation_surer: str = "default"
+    structural_mutation_surer: str = "true"
     bias_init_type: str = "gaussian"
     response_init_type: str = "gaussian"
     weight_init_type: str = "gaussian"
