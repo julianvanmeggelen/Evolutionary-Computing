@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 
-#SBATCH --job-name=robot_bodybrain_ea
+#SBATCH --job-name=rotation
 
 #SBATCH --nodes=1
 
@@ -24,7 +24,7 @@
 
 source $HOME/.bashrc
 conda activate EC
-NRUNS=10 NGEN=100 python hyperopt.py --timeout 345600 # 3 days #28800 # 8hours
+FITNESS_FUN=ROTATION NRUNS=10 NGEN=100 python hyperopt.py --timeout 345600 # 3 days #28800 # 8hours
 
 # Specify the directory you want to copy
 source_directory="./results"
