@@ -120,6 +120,9 @@ if __name__ == "__main__":
 
     print(optimization_result.summary().to_latex())
 
+    optimization_result.summary().to_clipboard()
+    print(f"Copied result table to clipboard")
+
     #Print the importance
     print('Parameter importance')
     print(pd.DataFrame([optimization_result.importance]))
