@@ -22,7 +22,7 @@ class RevolveNeatConfig(NeatGenomeConfigGenericMixin):
     aggregation_mutate_rate: float = 0.0
     aggregation_options: str = "sum"
     bias_init_mean: float = 0.0
-    bias_init_stdev: float = 1.0
+    bias_init_stdev: float = 0.0
     bias_max_value: float = 10.0 # NOTE: it was 0 for multiNEAT
     bias_min_value: float = -10.0 # NOTE: it was 0 for multiNEAT
     bias_mutate_power: float = 0.5
