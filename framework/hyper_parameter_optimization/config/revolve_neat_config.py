@@ -54,7 +54,7 @@ class RevolveNeatConfig(NeatGenomeConfigGenericMixin):
     weight_min_value: float = -8
     weight_mutate_power: float = 0.2
     weight_mutate_rate: float = 0.9
-    weight_replace_rate: float = 0.0 # NOTE: it was 0.25 for multiNEAT
+    weight_replace_rate: float = 0.2 
     single_structural_mutation = False
     enabled_rate_to_false_add: float = 0.0
     enabled_rate_to_true_add: float = 0.0
