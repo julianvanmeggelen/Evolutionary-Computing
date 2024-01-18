@@ -1,7 +1,8 @@
+import numpy as np
 from revolve2.modular_robot_simulation import ModularRobotSimulationState
 
 def rotation(
-    begin_state: ModularRobotSimulationState, end_state: ModularRobotSimulationState
+    states: list[ModularRobotSimulationState]
 ) -> float:
     """
     Calculate the rotation by a single modular robot.
@@ -10,12 +11,12 @@ def rotation(
     :param end_state: End state of the robot.
     :returns: The calculated fitness.
     """
-    begin_position = begin_state.get_pose().orientation.angle
-    end_position = end_state.get_pose().orientation.angle
-    return end_position-begin_position
-
-
-
+    angles = [state.get_pose().orientation.angle for state in states]
+    angles = np.array(angles)
+    rotation = np.diff(angles)
+    rotation = (rotation + np.pi) % (2 * np.pi) - np.pi
+    total_rotation = np.abs(np.sum(rotation))
+    return total_rotation.item()
 
 def targeted_locomotion(
     begin_state: ModularRobotSimulationState, end_state: ModularRobotSimulationState

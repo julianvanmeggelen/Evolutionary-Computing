@@ -63,8 +63,8 @@ if __name__ == "__main__":
 
     logging.info(f"Running with args: {args.spot=}, {args.name=}, {args.timeout=}")
     print(f"Running with args: {args.spot=}, {args.name=}, {args.timeout=}")
-    logging.info(f"Using fitness function {os.getenv('FIT_FUN')}")
-    print(f"Using fitness function {os.getenv('FIT_FUN')}")
+    logging.info(f"Using fitness function {os.getenv('FITNESS_FUN')}")
+    print(f"Using fitness function {os.getenv('FITNESS_FUN')}")
 
     base_config = RevolveNeatConfig(
         body_num_inputs=5, 

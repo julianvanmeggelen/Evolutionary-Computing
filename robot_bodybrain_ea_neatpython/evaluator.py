@@ -21,18 +21,41 @@ class FitnessFunctions:
     TARGETED_LOCOMOTION = 'TARGETED_LOCOMOTION'
     DEFAULT = 'XY_DISPLACEMENT'
 
-def load_fitness_function() -> Callable[[ModularRobotSimulationState,ModularRobotSimulationState], float]:
+def load_fitness_function() -> tuple[str, Callable[[ModularRobotSimulationState,ModularRobotSimulationState], float]]:
     """ Load fitness function from environment or load default (XY_DISPLACEMENT)
     """
     env_var = os.getenv("FITNESS_FUN", FitnessFunctions.DEFAULT).upper()
     if env_var == FitnessFunctions.XY_DISPLACEMENT:
-        return  fitness_functions.xy_displacement
+        return  FitnessFunctions.XY_DISPLACEMENT, fitness_functions.xy_displacement
     if env_var == FitnessFunctions.ROTATION:
-        return rotation
+        return FitnessFunctions.ROTATION, rotation
     if env_var == FitnessFunctions.TARGETED_LOCOMOTION:
-        return targeted_locomotion
+        return FitnessFunctions.TARGETED_LOCOMOTION, targeted_locomotion
     
     raise NotImplementedError(f'Fitness function {env_var} not recognized as a fitness function')
+
+
+def evaluate_fitness_function(robots, scene_states) -> list[float]:
+    fit_fun_name, fit_fun = load_fitness_function()
+    if fit_fun_name == FitnessFunctions.ROTATION:
+        fit_vals = [
+            fit_fun(
+                [state.get_modular_robot_simulation_state(robot) for state in states]
+            )
+            for robot, states in zip(robots, scene_states)
+        ]
+    else:
+        fit_vals = [
+            fit_fun(
+                states[0].get_modular_robot_simulation_state(robot),
+                states[-1].get_modular_robot_simulation_state(robot),
+            )
+            for robot, states in zip(robots, scene_states)
+        ]
+
+    return fit_vals
+
+
 
 class Evaluator:
     """Provides evaluation of robots."""
@@ -83,14 +106,4 @@ class Evaluator:
         )
 
         # Calculate the fitness.
-        fit_fun = load_fitness_function()
-
-        xy_displacements = [
-            fit_fun(
-                states[0].get_modular_robot_simulation_state(robot),
-                states[-1].get_modular_robot_simulation_state(robot),
-            )
-            for robot, states in zip(robots, scene_states)
-        ]
-
-        return xy_displacements
+        return evaluate_fitness_function(robots, scene_states)
