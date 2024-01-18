@@ -70,12 +70,14 @@ class HyperOptimizer:
         """
         Evaluate the configuration and return the utility
         """
-        eval_bt = datetime.now()
-        optimization_run = self.objective(config)
-        eval_et = datetime.now()
-        optimization_run.config = config
-        self.result.add(optimization_run)
-        return optimization_run.utility
+        try:
+            optimization_run = self.objective(config)
+            optimization_run.config = config
+            self.result.add(optimization_run)     
+            return optimization_run.utility
+        except Exception as e:
+            logging.info("Objective returned exception, returning 0")
+            return 0
 
     def _internal_objective(self, *args, **kwargs) -> float:
         """

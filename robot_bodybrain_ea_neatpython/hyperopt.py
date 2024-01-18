@@ -17,6 +17,10 @@ import argparse
 from revolve2.experimentation.logging import setup_logging
 import logging
 
+import warnings
+warnings.simplefilter("ignore")
+
+
 setup_logging(level=logging.DEBUG)
 
 pd.set_option("display.max_rows", 500)
